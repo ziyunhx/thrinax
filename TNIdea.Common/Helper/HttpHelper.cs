@@ -10,7 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections;
-using HtmlAgilityPack;
+using TNIdea.Common.Data;
 
 namespace TNIdea.Common.Helper
 {
@@ -19,7 +19,7 @@ namespace TNIdea.Common.Helper
         public const string CharsetReg = @"(meta.*?charset=""?(?<Charset>[^\s""'>]+)""?)|(xml.*?encoding=""?(?<Charset>[^\s"">]+)""?)";
 
         /// <summary>
-        /// 获取网页的内容
+        /// 使用Http Request获取网页信息
         /// </summary>
         /// <param name="url">Url</param>
         /// <param name="postData">Post的信息</param>
@@ -29,15 +29,21 @@ namespace TNIdea.Common.Helper
         /// <param name="cookiesDomain">Cookies的Domian参数，配合cookies使用；为空则取url的Host</param>
         /// <param name="encode">编码方式，用于解析html</param>
         /// <returns></returns>
-        public static string GetHttpContent(string url, string postData = null, CookieContainer cookies = null, string userAgent = "", string referer = "", string cookiesDomain = "", Encoding encode = null)
+        public static HttpResponse HttpRequest(string url, string postData = null, CookieContainer cookies = null, string userAgent = "", string referer = "", string cookiesDomain = "", Encoding encode = null)
         {
+            HttpResponse httpResponse = new HttpResponse();
+
             try
             {
-                HttpWebResponse httpResponse = null;
+                HttpWebResponse httpWebResponse = null;
                 if (!string.IsNullOrWhiteSpace(postData))
-                    httpResponse = CreatePostHttpResponse(url, postData, cookies: cookies, userAgent: userAgent, referer: referer);
+                    httpWebResponse = CreatePostHttpResponse(url, postData, cookies: cookies, userAgent: userAgent, referer: referer);
                 else
-                    httpResponse = CreateGetHttpResponse(url, cookies: cookies, userAgent: userAgent, referer: referer);
+                    httpWebResponse = CreateGetHttpResponse(url, cookies: cookies, userAgent: userAgent, referer: referer);
+
+                httpResponse.Url = httpWebResponse.ResponseUri.ToString();
+                httpResponse.HttpCode = (int)httpWebResponse.StatusCode;
+                httpResponse.LastModified = TimeHelper.ConvertDateTimeInt(httpWebResponse.LastModified);
 
                 #region 根据Html头判断
                 string Content = null;
@@ -51,44 +57,39 @@ namespace TNIdea.Common.Helper
 
                 //创建流对象并解码
                 Stream ResponseStream;
-                switch (httpResponse.ContentEncoding.ToUpperInvariant())
+                switch (httpWebResponse.ContentEncoding.ToUpperInvariant())
                 {
                     case "GZIP":
                         ResponseStream = new GZipStream(
-                            httpResponse.GetResponseStream(), CompressionMode.Decompress);
+                            httpWebResponse.GetResponseStream(), CompressionMode.Decompress);
                         break;
                     case "DEFLATE":
                         ResponseStream = new DeflateStream(
-                            httpResponse.GetResponseStream(), CompressionMode.Decompress);
+                            httpWebResponse.GetResponseStream(), CompressionMode.Decompress);
                         break;
                     default:
-                        ResponseStream = httpResponse.GetResponseStream();
+                        ResponseStream = httpWebResponse.GetResponseStream();
                         break;
                 }
 
                 try
                 {
-                    while (
-                        !(cache.EndsWith("</head>", StringComparison.OrdinalIgnoreCase)
-                          || count >= N_CacheLength))
+                    while (!(cache.EndsWith("</head>", StringComparison.OrdinalIgnoreCase) || count >= N_CacheLength))
                     {
                         var b = (byte)ResponseStream.ReadByte();
                         if (b < 0) //end of stream
-                        {
                             break;
-                        }
                         bytes.Add(b);
 
                         count++;
                         cache += (char)b;
                     }
 
-
                     if (encode == null)
                     {
                         try
                         {
-                            if (httpResponse.CharacterSet == "ISO-8859-1" || httpResponse.CharacterSet == "zh-cn")
+                            if (httpWebResponse.CharacterSet == "ISO-8859-1" || httpWebResponse.CharacterSet == "zh-cn")
                             {
                                 Match match = Regex.Match(cache, CharsetReg, RegexOptions.IgnoreCase | RegexOptions.Multiline);
                                 if (match.Success)
@@ -104,7 +105,7 @@ namespace TNIdea.Common.Helper
                                     encode = Encoding.GetEncoding("GB2312");
                             }
                             else
-                                encode = Encoding.GetEncoding(httpResponse.CharacterSet);
+                                encode = Encoding.GetEncoding(httpWebResponse.CharacterSet);
                         }
                         catch { }
                     }
@@ -116,30 +117,46 @@ namespace TNIdea.Common.Helper
                 }
                 catch (Exception ex)
                 {
-                    return ex.ToString();
+                    httpResponse.Content = ex.ToString();
+                    return httpResponse;
                 }
                 finally
                 {
-                    httpResponse.Close();
+                    httpWebResponse.Close();
                 }
                 #endregion 根据Html头判断
-
                 //获取返回的Cookies，支持httponly
                 if (string.IsNullOrWhiteSpace(cookiesDomain))
-                    cookiesDomain = httpResponse.ResponseUri.Host;
+                    cookiesDomain = httpWebResponse.ResponseUri.Host;
 
                 cookies = new CookieContainer();
-                CookieCollection httpHeaderCookies = SetCookie(httpResponse, cookiesDomain);
-                cookies.Add(httpHeaderCookies ?? httpResponse.Cookies);
+                CookieCollection httpHeaderCookies = SetCookie(httpWebResponse, cookiesDomain);
+                cookies.Add(httpHeaderCookies ?? httpWebResponse.Cookies);
 
-                return Content;
+                httpResponse.Content = Content;
             }
             catch
             {
-                return string.Empty;
+                httpResponse.Content = string.Empty;
             }
+            return httpResponse;
         }
 
+        /// <summary>
+        /// 获取网页的内容
+        /// </summary>
+        /// <param name="url">Url</param>
+        /// <param name="postData">Post的信息</param>
+        /// <param name="cookies">Cookies</param>
+        /// <param name="userAgent">浏览器标识</param>
+        /// <param name="referer">来源页</param>
+        /// <param name="cookiesDomain">Cookies的Domian参数，配合cookies使用；为空则取url的Host</param>
+        /// <param name="encode">编码方式，用于解析html</param>
+        /// <returns></returns>
+        public static string GetHttpContent(string url, string postData = null, CookieContainer cookies = null, string userAgent = "", string referer = "", string cookiesDomain = "", Encoding encode = null)
+        {
+            return HttpHelper.HttpRequest(url, postData, cookies, userAgent, referer, cookiesDomain, encode).Content;
+        }
 
         /// <summary>
         /// 创建GET方式的HTTP请求 
@@ -394,24 +411,6 @@ namespace TNIdea.Common.Helper
                 }
             }
             return cookieContainer;
-        }
-
-        public static string BuildPostData(string htmlContent)
-        {
-            HtmlDocument htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(htmlContent);
-            //Get the form node collection.
-            HtmlNode htmlNode = htmlDoc.DocumentNode.SelectSingleNode("//form");
-            HtmlNodeCollection htmlInputs = htmlNode.SelectNodes("//input");
-
-            StringBuilder postData = new StringBuilder();
-
-            foreach (HtmlNode input in htmlInputs)
-            {
-                if (input.Attributes["name"] != null && input.Attributes["value"] != null)
-                    postData.Append(input.Attributes["name"].Value + "=" + input.Attributes["value"].Value + "&");
-            }
-            return postData.ToString().TrimEnd('&');
         }
     }
 }
