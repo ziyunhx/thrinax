@@ -104,10 +104,14 @@ namespace TNIdea.Common.Helper
                                 else
                                     encode = Encoding.GetEncoding("GB2312");
                             }
-                            else
+                            else if (httpWebResponse.CharacterSet != null)
                                 encode = Encoding.GetEncoding(httpWebResponse.CharacterSet);
+                            else
+                                encode = Encoding.GetEncoding("GB2312");
                         }
-                        catch { }
+                        catch {
+                            encode = Encoding.GetEncoding("GB2312");
+                        }
                     }
 
                     //缓冲字节重新编码，然后再把流读完
