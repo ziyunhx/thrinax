@@ -7,8 +7,8 @@
     <ProjectGuid>{1DA0FA07-ED7C-497A-8B8A-A19ED60B49E7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TNIdea.Common</RootNamespace>
-    <AssemblyName>TNIdea.Common</AssemblyName>
+    <RootNamespace>Thrinax</RootNamespace>
+    <AssemblyName>Thrinax</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

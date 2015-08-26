@@ -10,9 +10,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections;
-using TNIdea.Common.Data;
+using Thrinax.Data;
 
-namespace TNIdea.Common.Helper
+namespace Thrinax.Helper
 {
     public class HttpHelper
     {
