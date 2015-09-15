@@ -25,7 +25,7 @@ namespace Thrinax.Helper
         public static long ConvertDateTimeInt(DateTime time)
         {
             DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1, 0, 0, 0, 0));
-            long t = (time.Ticks - startTime.Ticks) / 10000;            //除10000调整为13位
+            long t = (time.Ticks - startTime.Ticks) / 10000;  //除10000调整为13位
             return t;
         }
     }
