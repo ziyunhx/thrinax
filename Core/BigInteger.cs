@@ -132,7 +132,7 @@
 
 using System;
 
-namespace TNIdea.Common
+namespace Thrinax
 {
     public class BigInteger
     {

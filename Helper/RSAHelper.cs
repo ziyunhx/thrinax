@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace TNIdea.Common.Helper
+namespace Thrinax.Helper
 {
     public class RSAHelper
     {

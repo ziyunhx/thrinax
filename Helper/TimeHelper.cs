@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TNIdea.Common.Helper
+namespace Thrinax.Helper
 {
     public class TimeHelper
     {

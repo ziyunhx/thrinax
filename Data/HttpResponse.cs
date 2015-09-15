@@ -1,4 +1,4 @@
-﻿namespace TNIdea.Common.Data
+﻿namespace Thrinax.Data
 {
     /// <summary>
     /// The result of http request

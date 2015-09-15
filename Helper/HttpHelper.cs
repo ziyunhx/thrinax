@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 using System.Collections;
 using TNIdea.Common.Data;
 
-namespace TNIdea.Common.Helper
+namespace Thrinax.Helper
 {
     public class HttpHelper
     {
