@@ -191,7 +191,7 @@ namespace Thrinax.Helper
 
             //设置代理UserAgent和超时
             if (string.IsNullOrWhiteSpace(userAgent))
-                userAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36";
+                userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36";
 
             request.UserAgent = userAgent;
             request.Timeout = timeout;
@@ -232,12 +232,13 @@ namespace Thrinax.Helper
             request.Referer = referer;
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded";
+            request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
 
             //设置代理UserAgent和超时
             if (string.IsNullOrWhiteSpace(userAgent))
-                request.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36";
-            else
-                request.UserAgent = userAgent;
+                userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36";
+
+            request.UserAgent = userAgent;
             request.Timeout = timeout;
             request.KeepAlive = true;
             request.AllowAutoRedirect = true;
