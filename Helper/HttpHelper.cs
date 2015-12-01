@@ -37,7 +37,7 @@ namespace Thrinax.Helper
             try
             {
                 HttpWebResponse httpWebResponse = null;
-                if (!string.IsNullOrWhiteSpace(postData) || method.ToUpper() == "POST")
+                if (!string.IsNullOrEmpty(postData) || (!string.IsNullOrEmpty(method) && method.ToUpper() == "POST"))
                     httpWebResponse = CreatePostHttpResponse(url, postData, cookies: cookies, userAgent: userAgent, referer: referer);
                 else
                     httpWebResponse = CreateGetHttpResponse(url, cookies: cookies, userAgent: userAgent, referer: referer);
@@ -131,7 +131,7 @@ namespace Thrinax.Helper
                 }
                 #endregion 根据Html头判断
                 //获取返回的Cookies，支持httponly
-                if (string.IsNullOrWhiteSpace(cookiesDomain))
+                if (string.IsNullOrEmpty(cookiesDomain))
                     cookiesDomain = httpWebResponse.ResponseUri.Host;
 
                 cookies = new CookieContainer();
@@ -192,7 +192,7 @@ namespace Thrinax.Helper
             request.Method = "GET";
 
             //设置代理UserAgent和超时
-            if (string.IsNullOrWhiteSpace(userAgent))
+            if (string.IsNullOrEmpty(userAgent))
                 userAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36";
 
             request.UserAgent = userAgent;
@@ -236,7 +236,7 @@ namespace Thrinax.Helper
             request.ContentType = "application/x-www-form-urlencoded";
 
             //设置代理UserAgent和超时
-            if (string.IsNullOrWhiteSpace(userAgent))
+            if (string.IsNullOrEmpty(userAgent))
                 request.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36";
             else
                 request.UserAgent = userAgent;
@@ -249,7 +249,7 @@ namespace Thrinax.Helper
             request.CookieContainer = cookies;
 
             //发送POST数据  
-            if (!string.IsNullOrWhiteSpace(postData))
+            if (!string.IsNullOrEmpty(postData))
             {
                 byte[] data = Encoding.UTF8.GetBytes(postData);
                 request.ContentLength = data.Length;
