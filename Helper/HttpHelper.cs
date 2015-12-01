@@ -28,15 +28,16 @@ namespace Thrinax.Helper
         /// <param name="referer">来源页</param>
         /// <param name="cookiesDomain">Cookies的Domian参数，配合cookies使用；为空则取url的Host</param>
         /// <param name="encode">编码方式，用于解析html</param>
+        /// <param name="method">提交方式，例如POST或GET，默认通过postData是否为空判断</param>
         /// <returns></returns>
-        public static HttpResponse HttpRequest(string url, string postData = null, CookieContainer cookies = null, string userAgent = "", string referer = "", string cookiesDomain = "", Encoding encode = null)
+        public static HttpResponse HttpRequest(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null)
         {
             HttpResponse httpResponse = new HttpResponse();
 
             try
             {
                 HttpWebResponse httpWebResponse = null;
-                if (!string.IsNullOrWhiteSpace(postData))
+                if (!string.IsNullOrWhiteSpace(postData) || method.ToUpper() == "POST")
                     httpWebResponse = CreatePostHttpResponse(url, postData, cookies: cookies, userAgent: userAgent, referer: referer);
                 else
                     httpWebResponse = CreateGetHttpResponse(url, cookies: cookies, userAgent: userAgent, referer: referer);
@@ -156,10 +157,11 @@ namespace Thrinax.Helper
         /// <param name="referer">来源页</param>
         /// <param name="cookiesDomain">Cookies的Domian参数，配合cookies使用；为空则取url的Host</param>
         /// <param name="encode">编码方式，用于解析html</param>
+        /// <param name="method">提交方式，例如POST或GET，默认通过postData是否为空判断</param>
         /// <returns></returns>
-        public static string GetHttpContent(string url, string postData = null, CookieContainer cookies = null, string userAgent = "", string referer = "", string cookiesDomain = "", Encoding encode = null)
+        public static string GetHttpContent(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null)
         {
-            return HttpHelper.HttpRequest(url, postData, cookies, userAgent, referer, cookiesDomain, encode).Content;
+            return HttpHelper.HttpRequest(url, postData, cookies, userAgent, referer, cookiesDomain, encode, method).Content;
         }
 
         /// <summary>
@@ -171,7 +173,7 @@ namespace Thrinax.Helper
         /// <param name="cookies"></param>
         /// <param name="referer"></param>
         /// <returns></returns>
-        public static HttpWebResponse CreateGetHttpResponse(string url, int timeout = 60000, string userAgent = "", CookieContainer cookies = null, string referer = "")
+        public static HttpWebResponse CreateGetHttpResponse(string url, int timeout = 60000, string userAgent = null, CookieContainer cookies = null, string referer = null)
         {
             HttpWebRequest request = null;
             if (url.StartsWith("https", StringComparison.OrdinalIgnoreCase))
@@ -215,7 +217,7 @@ namespace Thrinax.Helper
         /// <param name="cookies"></param>
         /// <param name="referer"></param>
         /// <returns></returns>
-        public static HttpWebResponse CreatePostHttpResponse(string url, string postData, int timeout = 60000, string userAgent = "", CookieContainer cookies = null, string referer = "")
+        public static HttpWebResponse CreatePostHttpResponse(string url, string postData, int timeout = 60000, string userAgent = null, CookieContainer cookies = null, string referer = null)
         {
             HttpWebRequest request = null;
             //如果是发送HTTPS请求  
@@ -402,15 +404,19 @@ namespace Thrinax.Helper
                 {
                     if (!string.IsNullOrEmpty(strCNameAndCValue))
                     {
-                        Cookie cookTemp = new Cookie();
-                        int firstEqual = strCNameAndCValue.IndexOf("=");
-                        string firstName = strCNameAndCValue.Substring(0, firstEqual);
-                        string allValue = strCNameAndCValue.Substring(firstEqual + 1, strCNameAndCValue.Length - (firstEqual + 1));
-                        cookTemp.Name = firstName;
-                        cookTemp.Value = allValue;
-                        cookTemp.Path = "/";
-                        cookTemp.Domain = cookie.Key;
-                        cookieContainer.Add(cookTemp);
+                        try
+                        {
+                            Cookie cookTemp = new Cookie();
+                            int firstEqual = strCNameAndCValue.IndexOf("=");
+                            string firstName = strCNameAndCValue.Substring(0, firstEqual);
+                            string allValue = strCNameAndCValue.Substring(firstEqual + 1, strCNameAndCValue.Length - (firstEqual + 1));
+                            cookTemp.Name = firstName;
+                            cookTemp.Value = allValue;
+                            cookTemp.Path = "/";
+                            cookTemp.Domain = cookie.Key;
+                            cookieContainer.Add(cookTemp);
+                        }
+                        catch { }
                     }
                 }
             }
