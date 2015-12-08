@@ -30,7 +30,7 @@ namespace Thrinax.Helper
         /// <param name="encode">编码方式，用于解析html</param>
         /// <param name="method">提交方式，例如POST或GET，默认通过postData是否为空判断</param>
         /// <returns></returns>
-        public static HttpResponse HttpRequest(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null)
+        public static HttpResponse HttpRequest(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null, IWebProxy proxy = null)
         {
             HttpResponse httpResponse = new HttpResponse();
 
@@ -38,9 +38,9 @@ namespace Thrinax.Helper
             {
                 HttpWebResponse httpWebResponse = null;
                 if (!string.IsNullOrEmpty(postData) || (!string.IsNullOrEmpty(method) && method.ToUpper() == "POST"))
-                    httpWebResponse = CreatePostHttpResponse(url, postData, cookies: cookies, userAgent: userAgent, referer: referer);
+                    httpWebResponse = CreatePostHttpResponse(url, postData, cookies: cookies, userAgent: userAgent, referer: referer, proxy: proxy);
                 else
-                    httpWebResponse = CreateGetHttpResponse(url, cookies: cookies, userAgent: userAgent, referer: referer);
+                    httpWebResponse = CreateGetHttpResponse(url, cookies: cookies, userAgent: userAgent, referer: referer, proxy: proxy);
 
                 httpResponse.Url = httpWebResponse.ResponseUri.ToString();
                 httpResponse.HttpCode = (int)httpWebResponse.StatusCode;
@@ -110,7 +110,8 @@ namespace Thrinax.Helper
                             else
                                 encode = Encoding.GetEncoding("GB2312");
                         }
-                        catch {
+                        catch
+                        {
                             encode = Encoding.GetEncoding("GB2312");
                         }
                     }
@@ -138,7 +139,7 @@ namespace Thrinax.Helper
                 CookieCollection httpHeaderCookies = SetCookie(httpWebResponse, cookiesDomain);
                 cookies.Add(httpHeaderCookies ?? httpWebResponse.Cookies);
 
-                httpResponse.Content = Content;
+                httpResponse.Content = Content.Replace("", "");
             }
             catch
             {
@@ -159,9 +160,9 @@ namespace Thrinax.Helper
         /// <param name="encode">编码方式，用于解析html</param>
         /// <param name="method">提交方式，例如POST或GET，默认通过postData是否为空判断</param>
         /// <returns></returns>
-        public static string GetHttpContent(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null)
+        public static string GetHttpContent(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null, IWebProxy proxy = null)
         {
-            return HttpHelper.HttpRequest(url, postData, cookies, userAgent, referer, cookiesDomain, encode, method).Content;
+            return HttpHelper.HttpRequest(url, postData, cookies, userAgent, referer, cookiesDomain, encode, method, proxy).Content;
         }
 
         /// <summary>
@@ -173,7 +174,7 @@ namespace Thrinax.Helper
         /// <param name="cookies"></param>
         /// <param name="referer"></param>
         /// <returns></returns>
-        public static HttpWebResponse CreateGetHttpResponse(string url, int timeout = 60000, string userAgent = null, CookieContainer cookies = null, string referer = null)
+        public static HttpWebResponse CreateGetHttpResponse(string url, int timeout = 60000, string userAgent = null, CookieContainer cookies = null, string referer = null, IWebProxy proxy = null)
         {
             HttpWebRequest request = null;
             if (url.StartsWith("https", StringComparison.OrdinalIgnoreCase))
@@ -200,6 +201,8 @@ namespace Thrinax.Helper
             request.KeepAlive = true;
             request.AllowAutoRedirect = true;
 
+            request.Proxy = proxy;
+
             if (cookies == null)
                 cookies = new CookieContainer();
             request.CookieContainer = cookies;
@@ -217,7 +220,7 @@ namespace Thrinax.Helper
         /// <param name="cookies"></param>
         /// <param name="referer"></param>
         /// <returns></returns>
-        public static HttpWebResponse CreatePostHttpResponse(string url, string postData, int timeout = 60000, string userAgent = null, CookieContainer cookies = null, string referer = null)
+        public static HttpWebResponse CreatePostHttpResponse(string url, string postData, int timeout = 60000, string userAgent = null, CookieContainer cookies = null, string referer = null, IWebProxy proxy = null)
         {
             HttpWebRequest request = null;
             //如果是发送HTTPS请求  
@@ -247,6 +250,8 @@ namespace Thrinax.Helper
             if (cookies == null)
                 cookies = new CookieContainer();
             request.CookieContainer = cookies;
+
+            request.Proxy = proxy;
 
             //发送POST数据  
             if (!string.IsNullOrEmpty(postData))
