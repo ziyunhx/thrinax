@@ -16,7 +16,7 @@ namespace Thrinax.Helper
 {
     public class HttpHelper
     {
-        public const string CharsetReg = @"(meta.*?charset=""?(?<Charset>[^\s""'>]+)""?)|(xml.*?encoding=""?(?<Charset>[^\s"">]+)""?)";
+        public const string CharsetReg = @"(meta.*?charset=""?(?<Charset>[^\s""'>;]+)""?)|(xml.*?encoding=""?(?<Charset>[^\s"">;]+)""?)";
 
         /// <summary>
         /// 使用Http Request获取网页信息
