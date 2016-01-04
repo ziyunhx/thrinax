@@ -139,7 +139,7 @@ namespace Thrinax.Helper
                 CookieCollection httpHeaderCookies = SetCookie(httpWebResponse, cookiesDomain);
                 cookies.Add(httpHeaderCookies ?? httpWebResponse.Cookies);
 
-                httpResponse.Content = Content.Replace("", "");
+                httpResponse.Content = Content.Replace("", "").Replace("�", "");
             }
             catch
             {
@@ -191,6 +191,7 @@ namespace Thrinax.Helper
 
             request.Referer = referer;
             request.Method = "GET";
+            request.ContentType = "application/json,application/x-www-form-urlencoded";
 
             //设置代理UserAgent和超时
             if (string.IsNullOrEmpty(userAgent))
@@ -236,7 +237,7 @@ namespace Thrinax.Helper
             }
             request.Referer = referer;
             request.Method = "POST";
-            request.ContentType = "application/x-www-form-urlencoded";
+            request.ContentType = "application/json,application/x-www-form-urlencoded";
 
             //设置代理UserAgent和超时
             if (string.IsNullOrEmpty(userAgent))
