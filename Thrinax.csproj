@@ -43,7 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\BigInteger.cs" />
-    <Compile Include="Data\HttpResponse.cs" />
+    <Compile Include="Data\HttpResult.cs" />
     <Compile Include="Helper\HttpHelper.cs" />
     <Compile Include="Helper\RSAHelper.cs" />
     <Compile Include="Helper\TimeHelper.cs" />

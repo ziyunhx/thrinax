@@ -3,7 +3,7 @@
     /// <summary>
     /// The result of http request
     /// </summary>
-    public class HttpResponse
+    public class HttpResult
     {
         /// <summary>
         /// the http status code.

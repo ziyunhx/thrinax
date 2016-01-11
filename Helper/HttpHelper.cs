@@ -30,9 +30,9 @@ namespace Thrinax.Helper
         /// <param name="encode">编码方式，用于解析html</param>
         /// <param name="method">提交方式，例如POST或GET，默认通过postData是否为空判断</param>
         /// <returns></returns>
-        public static HttpResponse HttpRequest(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null, IWebProxy proxy = null)
+        public static HttpResult HttpRequest(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null, IWebProxy proxy = null)
         {
-            HttpResponse httpResponse = new HttpResponse();
+            HttpResult httpResponse = new HttpResult();
 
             try
             {
@@ -174,7 +174,7 @@ namespace Thrinax.Helper
         /// <param name="cookies"></param>
         /// <param name="referer"></param>
         /// <returns></returns>
-        public static HttpWebResponse CreateGetHttpResponse(string url, int timeout = 60000, string userAgent = null, CookieContainer cookies = null, string referer = null, IWebProxy proxy = null)
+        public static HttpWebResponse CreateGetHttpResponse(string url, int timeout = 8000, string userAgent = null, CookieContainer cookies = null, string referer = null, IWebProxy proxy = null)
         {
             HttpWebRequest request = null;
             if (url.StartsWith("https", StringComparison.OrdinalIgnoreCase))
@@ -191,7 +191,7 @@ namespace Thrinax.Helper
 
             request.Referer = referer;
             request.Method = "GET";
-            request.ContentType = "application/json,application/x-www-form-urlencoded";
+            request.ContentType = "application/x-www-form-urlencoded";
 
             //设置代理UserAgent和超时
             if (string.IsNullOrEmpty(userAgent))
@@ -221,7 +221,7 @@ namespace Thrinax.Helper
         /// <param name="cookies"></param>
         /// <param name="referer"></param>
         /// <returns></returns>
-        public static HttpWebResponse CreatePostHttpResponse(string url, string postData, int timeout = 60000, string userAgent = null, CookieContainer cookies = null, string referer = null, IWebProxy proxy = null)
+        public static HttpWebResponse CreatePostHttpResponse(string url, string postData, int timeout = 8000, string userAgent = null, CookieContainer cookies = null, string referer = null, IWebProxy proxy = null)
         {
             HttpWebRequest request = null;
             //如果是发送HTTPS请求  
@@ -237,7 +237,7 @@ namespace Thrinax.Helper
             }
             request.Referer = referer;
             request.Method = "POST";
-            request.ContentType = "application/json,application/x-www-form-urlencoded";
+            request.ContentType = "application/x-www-form-urlencoded";
 
             //设置代理UserAgent和超时
             if (string.IsNullOrEmpty(userAgent))

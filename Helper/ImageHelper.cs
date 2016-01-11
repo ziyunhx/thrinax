@@ -31,6 +31,11 @@ namespace Thrinax.Helper
 			return null;
 		}
 
+        public static Image GetImageByUrl(string url)
+        {
+            return null;
+        }
+
 		/// <summary>
 		/// Gets the bytes by image path.
 		/// </summary>
@@ -38,7 +43,7 @@ namespace Thrinax.Helper
 		/// <param name="strFile">String file.</param>
 		public static byte[] GetBytesByImagePath(string strFile)
 		{
-			Image image=Image.FromFile(strFile);
+            Image image = Image.FromFile(strFile);
 
 			return GetBytesByImage(image);
 		}
