@@ -29,8 +29,12 @@ namespace Thrinax.Helper
         /// <param name="cookiesDomain">Cookies的Domian参数，配合cookies使用；为空则取url的Host</param>
         /// <param name="encode">编码方式，用于解析html</param>
         /// <param name="method">提交方式，例如POST或GET，默认通过postData是否为空判断</param>
+        /// <param name="proxy"></param>
+        /// <param name="encoding"></param>
+        /// <param name="contentType"></param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        public static HttpResult HttpRequest(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null, IWebProxy proxy = null)
+        public static HttpResult HttpRequest(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null, IWebProxy proxy = null, string encoding = null, string contentType = null, int timeout = 8000)
         {
             HttpResult httpResponse = new HttpResult();
 
@@ -38,15 +42,14 @@ namespace Thrinax.Helper
             {
                 HttpWebResponse httpWebResponse = null;
                 if (!string.IsNullOrEmpty(postData) || (!string.IsNullOrEmpty(method) && method.ToUpper() == "POST"))
-                    httpWebResponse = CreatePostHttpResponse(url, postData, cookies: cookies, userAgent: userAgent, referer: referer, proxy: proxy);
+                    httpWebResponse = CreatePostHttpResponse(url, postData, timeout, userAgent, cookies, referer, proxy, contentType);
                 else
-                    httpWebResponse = CreateGetHttpResponse(url, cookies: cookies, userAgent: userAgent, referer: referer, proxy: proxy);
+                    httpWebResponse = CreateGetHttpResponse(url, timeout, userAgent, cookies, referer, proxy, contentType);
 
                 httpResponse.Url = httpWebResponse.ResponseUri.ToString();
                 httpResponse.HttpCode = (int)httpWebResponse.StatusCode;
                 httpResponse.LastModified = TimeHelper.ConvertDateTimeInt(httpWebResponse.LastModified);
 
-                #region 根据Html头判断
                 string Content = null;
                 //缓冲区长度
                 const int N_CacheLength = 10000;
@@ -86,9 +89,14 @@ namespace Thrinax.Helper
                         cache += (char)b;
                     }
 
+                    // Charset check: input > NChardet > Parser
                     if (encode == null)
                     {
-                        try
+                        string charset = NChardetHelper.RecogCharset(bytes.ToArray());
+                        if (!string.IsNullOrEmpty(charset))
+                            encode = Encoding.GetEncoding(charset);
+
+                        if (encode == null)
                         {
                             if (httpWebResponse.CharacterSet == "ISO-8859-1" || httpWebResponse.CharacterSet == "zh-cn")
                             {
@@ -97,26 +105,22 @@ namespace Thrinax.Helper
                                 {
                                     try
                                     {
-                                        string charset = match.Groups["Charset"].Value;
+                                        charset = match.Groups["Charset"].Value;
                                         encode = Encoding.GetEncoding(charset);
                                     }
                                     catch { }
                                 }
-                                else
-                                    encode = Encoding.GetEncoding("GB2312");
                             }
-                            else if (httpWebResponse.CharacterSet != null)
+
+                            if (httpWebResponse.CharacterSet != null && encode == null)
                                 encode = Encoding.GetEncoding(httpWebResponse.CharacterSet);
-                            else
-                                encode = Encoding.GetEncoding("GB2312");
-                        }
-                        catch
-                        {
-                            encode = Encoding.GetEncoding("GB2312");
                         }
                     }
 
-                    //缓冲字节重新编码，然后再把流读完
+                    if (encode == null)
+                        encode = Encoding.Default;
+
+                    //Recode the head and read to end.
                     var Reader = new StreamReader(ResponseStream, encode);
                     Content = encode.GetString(bytes.ToArray(), 0, count) + Reader.ReadToEnd();
                     Reader.Close();
@@ -130,8 +134,8 @@ namespace Thrinax.Helper
                 {
                     httpWebResponse.Close();
                 }
-                #endregion 根据Html头判断
-                //获取返回的Cookies，支持httponly
+
+                //get the Cookies，support httponly.
                 if (string.IsNullOrEmpty(cookiesDomain))
                     cookiesDomain = httpWebResponse.ResponseUri.Host;
 
@@ -159,10 +163,13 @@ namespace Thrinax.Helper
         /// <param name="cookiesDomain">Cookies的Domian参数，配合cookies使用；为空则取url的Host</param>
         /// <param name="encode">编码方式，用于解析html</param>
         /// <param name="method">提交方式，例如POST或GET，默认通过postData是否为空判断</param>
+        /// <param name="proxy"></param>
+        /// <param name="encoding"></param>
+        /// <param name="contentType"></param>
         /// <returns></returns>
-        public static string GetHttpContent(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null, IWebProxy proxy = null)
+        public static string GetHttpContent(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null, IWebProxy proxy = null, string encoding = null, string contentType = null, int timeout = 8000)
         {
-            return HttpHelper.HttpRequest(url, postData, cookies, userAgent, referer, cookiesDomain, encode, method, proxy).Content;
+            return HttpHelper.HttpRequest(url, postData, cookies, userAgent, referer, cookiesDomain, encode, method, proxy, encoding, contentType, timeout).Content;
         }
 
         /// <summary>
@@ -174,7 +181,7 @@ namespace Thrinax.Helper
         /// <param name="cookies"></param>
         /// <param name="referer"></param>
         /// <returns></returns>
-        public static HttpWebResponse CreateGetHttpResponse(string url, int timeout = 8000, string userAgent = null, CookieContainer cookies = null, string referer = null, IWebProxy proxy = null)
+        public static HttpWebResponse CreateGetHttpResponse(string url, int timeout = 8000, string userAgent = null, CookieContainer cookies = null, string referer = null, IWebProxy proxy = null, string contentType = null)
         {
             HttpWebRequest request = null;
             if (url.StartsWith("https", StringComparison.OrdinalIgnoreCase))
@@ -191,13 +198,12 @@ namespace Thrinax.Helper
 
             request.Referer = referer;
             request.Method = "GET";
-            request.ContentType = "application/x-www-form-urlencoded";
 
-            //设置代理UserAgent和超时
-            if (string.IsNullOrEmpty(userAgent))
-                userAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36";
+            request.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
+            request.Headers.Add("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4");
+            request.ContentType = string.IsNullOrEmpty(contentType) ? "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" : contentType;
+            request.UserAgent = string.IsNullOrEmpty(userAgent) ? "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.143 Safari/537.36" : userAgent;
 
-            request.UserAgent = userAgent;
             request.Timeout = timeout;
             request.KeepAlive = true;
             request.AllowAutoRedirect = true;
@@ -221,7 +227,7 @@ namespace Thrinax.Helper
         /// <param name="cookies"></param>
         /// <param name="referer"></param>
         /// <returns></returns>
-        public static HttpWebResponse CreatePostHttpResponse(string url, string postData, int timeout = 8000, string userAgent = null, CookieContainer cookies = null, string referer = null, IWebProxy proxy = null)
+        public static HttpWebResponse CreatePostHttpResponse(string url, string postData, int timeout = 8000, string userAgent = null, CookieContainer cookies = null, string referer = null, IWebProxy proxy = null, string contentType = null)
         {
             HttpWebRequest request = null;
             //如果是发送HTTPS请求  
@@ -237,13 +243,12 @@ namespace Thrinax.Helper
             }
             request.Referer = referer;
             request.Method = "POST";
-            request.ContentType = "application/x-www-form-urlencoded";
 
-            //设置代理UserAgent和超时
-            if (string.IsNullOrEmpty(userAgent))
-                request.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36";
-            else
-                request.UserAgent = userAgent;
+            request.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
+            request.Headers.Add("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4");
+            request.ContentType = string.IsNullOrEmpty(contentType) ? "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" : contentType;
+            request.UserAgent = string.IsNullOrEmpty(userAgent) ? "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.143 Safari/537.36" : userAgent;
+
             request.Timeout = timeout;
             request.KeepAlive = true;
             request.AllowAutoRedirect = true;
@@ -264,7 +269,6 @@ namespace Thrinax.Helper
                     stream.Write(data, 0, data.Length);
                 }
             }
-            //string[] values = request.Headers.GetValues("Content-Type");
             return request.GetResponse() as HttpWebResponse;
         }
 
@@ -365,9 +369,9 @@ namespace Thrinax.Helper
         }
 
         /// <summary>
-        /// 遍历CookieContainer
+        /// Get all cookies from CookieContainer.
         /// </summary>
-        /// <param name="cookieContainer"></param>
+        /// <param name="cookieContainer">the CookieContainer</param>
         /// <returns>List of cookie</returns>
         public static Dictionary<string, string> GetAllCookies(CookieContainer cookieContainer)
         {
@@ -395,8 +399,8 @@ namespace Thrinax.Helper
         /// <summary>
         /// convert cookies string to CookieContainer
         /// </summary>
-        /// <param name="cookies"></param>
-        /// <returns></returns>
+        /// <param name="cookies">cookies dictionary.</param>
+        /// <returns>the CookieContainer</returns>
         public static CookieContainer ConvertToCookieContainer(Dictionary<string, string> cookies)
         {
             CookieContainer cookieContainer = new CookieContainer();

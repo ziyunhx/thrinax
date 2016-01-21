@@ -43,10 +43,36 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\BigInteger.cs" />
+    <Compile Include="Data\Enums.cs" />
     <Compile Include="Data\HttpResult.cs" />
     <Compile Include="Helper\HttpHelper.cs" />
+    <Compile Include="Helper\NChardetHelper.cs" />
     <Compile Include="Helper\RSAHelper.cs" />
     <Compile Include="Helper\TimeHelper.cs" />
+    <Compile Include="NChardet\Big5Statistics.cs" />
+    <Compile Include="NChardet\BIG5Verifier.cs" />
+    <Compile Include="NChardet\CP1252Verifier.cs" />
+    <Compile Include="NChardet\EUCJPStatistics.cs" />
+    <Compile Include="NChardet\EUCJPVerifier.cs" />
+    <Compile Include="NChardet\EUCKRStatistics.cs" />
+    <Compile Include="NChardet\EUCKRVerifier.cs" />
+    <Compile Include="NChardet\EUCSampler.cs" />
+    <Compile Include="NChardet\EUCStatistics.cs" />
+    <Compile Include="NChardet\EUCTWStatistics.cs" />
+    <Compile Include="NChardet\EUCTWVerifier.cs" />
+    <Compile Include="NChardet\GB18030Verifier.cs" />
+    <Compile Include="NChardet\GB2312Statistics.cs" />
+    <Compile Include="NChardet\GB2312Verifier.cs" />
+    <Compile Include="NChardet\HZVerifier.cs" />
+    <Compile Include="NChardet\ISO2022CNVerifier.cs" />
+    <Compile Include="NChardet\ISO2022JPVerifier.cs" />
+    <Compile Include="NChardet\ISO2022KRVerifier.cs" />
+    <Compile Include="NChardet\PSMDetector.cs" />
+    <Compile Include="NChardet\SJISVerifier.cs" />
+    <Compile Include="NChardet\UCS2BEVerifier.cs" />
+    <Compile Include="NChardet\UCS2LEVerifier.cs" />
+    <Compile Include="NChardet\UTF8Verifier.cs" />
+    <Compile Include="NChardet\Verifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helper\ImageHelper.cs" />
   </ItemGroup>

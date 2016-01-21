@@ -2,6 +2,7 @@
 using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Net;
 
 namespace Thrinax.Helper
 {
@@ -31,9 +32,19 @@ namespace Thrinax.Helper
 			return null;
 		}
 
-        public static Image GetImageByUrl(string url)
+        /// <summary>
+        /// Get Image by url.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="refer"></param>
+        /// <param name="userAgent"></param>
+        /// <param name="cookies"></param>
+        /// <returns></returns>
+        public static Image GetImageByUrl(string url, string refer = "", string userAgent = "", CookieContainer cookies = null)
         {
-            return null;
+            HttpWebResponse response = HttpHelper.CreateGetHttpResponse(url, 20000, userAgent, cookies, refer);
+            Stream stream = response.GetResponseStream();
+            return Image.FromStream(stream);
         }
 
 		/// <summary>
