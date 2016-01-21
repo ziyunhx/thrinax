@@ -31,21 +31,12 @@ namespace Thrinax.Helper
         public static string RecogCharset(byte[] bytes, NChardetLanguage language = NChardetLanguage.ALL)
         {
             PSMDetector detector = new PSMDetector(language);
-
-            int time = 0;
-            int maxLength = 1024;
             string charset = String.Empty;
 
-            do
-            {
-                var tempBytes = bytes.Skip(maxLength * time);
-                if (tempBytes == null || tempBytes.Count() <= 0 || detector.HandleData(tempBytes.ToArray(), tempBytes.Count(), ref charset))                
-                    break;
-            }
-            while (true);
+            if (bytes == null || bytes.Length <= 0)
+                detector.HandleData(bytes, bytes.Length, ref charset);
 
-            if(string.IsNullOrEmpty(charset))
-                detector.DataEnd(ref charset);
+            detector.DataEnd(ref charset);
 
             return charset;
         }
