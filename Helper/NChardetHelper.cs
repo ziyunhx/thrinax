@@ -30,13 +30,31 @@ namespace Thrinax.Helper
         /// <returns>charset string, will be empty when can't recog.</returns>
         public static string RecogCharset(byte[] bytes, NChardetLanguage language = NChardetLanguage.ALL)
         {
+            if (bytes == null || bytes.Length == 0)
+                return null;
+
             PSMDetector detector = new PSMDetector(language);
             string charset = String.Empty;
 
-            if (bytes == null || bytes.Length <= 0)
-                detector.HandleData(bytes, bytes.Length, ref charset);
+            int maxLength = 1024;
+            int count = 0;
 
-            detector.DataEnd(ref charset);
+            do
+            {
+                var tempBytes = bytes.Skip(maxLength * count).Take(maxLength);
+                if (tempBytes == null || tempBytes.Count() == 0)
+                    break;
+
+                detector.HandleData(tempBytes.ToArray(), tempBytes.Count(), ref charset);
+                if (!string.IsNullOrEmpty(charset))
+                    break;
+
+                count++;
+            }
+            while (true);
+
+            if (string.IsNullOrEmpty(charset))
+                detector.DataEnd(ref charset);
 
             return charset;
         }
