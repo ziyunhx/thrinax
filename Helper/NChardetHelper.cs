@@ -27,8 +27,9 @@ namespace Thrinax.Helper
         /// </summary>
         /// <param name="bytes">the byte array.</param>
         /// <param name="language">the language.</param>
+        /// <param name="maxLength">max length per time.</param>
         /// <returns>charset string, will be empty when can't recog.</returns>
-        public static string RecogCharset(byte[] bytes, NChardetLanguage language = NChardetLanguage.ALL)
+        public static string RecogCharset(byte[] bytes, NChardetLanguage language = NChardetLanguage.ALL, int maxLength = -1)
         {
             if (bytes == null || bytes.Length == 0)
                 return null;
@@ -36,22 +37,28 @@ namespace Thrinax.Helper
             PSMDetector detector = new PSMDetector(language);
             string charset = String.Empty;
 
-            int maxLength = 1024;
-            int count = 0;
-
-            do
+            if (maxLength > 0)
             {
-                var tempBytes = bytes.Skip(maxLength * count).Take(maxLength);
-                if (tempBytes == null || tempBytes.Count() == 0)
-                    break;
+                int count = 0;
 
-                detector.HandleData(tempBytes.ToArray(), tempBytes.Count(), ref charset);
-                if (!string.IsNullOrEmpty(charset))
-                    break;
+                do
+                {
+                    var tempBytes = bytes.Skip(maxLength * count).Take(maxLength);
+                    if (tempBytes == null || tempBytes.Count() == 0)
+                        break;
 
-                count++;
+                    detector.HandleData(tempBytes.ToArray(), tempBytes.Count(), ref charset);
+                    if (!string.IsNullOrEmpty(charset))
+                        break;
+
+                    count++;
+                }
+                while (true);
             }
-            while (true);
+            else
+            {
+                detector.HandleData(bytes, bytes.Length, ref charset);
+            }
 
             if (string.IsNullOrEmpty(charset))
                 detector.DataEnd(ref charset);
