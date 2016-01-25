@@ -27,9 +27,9 @@ namespace Thrinax.Helper
         /// </summary>
         /// <param name="bytes">the byte array.</param>
         /// <param name="language">the language.</param>
-        /// <param name="maxLength">max length per time.</param>
+        /// <param name="maxLength">max length per time. the default is 1024, -1 to without limit.</param>
         /// <returns>charset string, will be empty when can't recog.</returns>
-        public static string RecogCharset(byte[] bytes, NChardetLanguage language = NChardetLanguage.ALL, int maxLength = -1)
+        public static string RecogCharset(byte[] bytes, NChardetLanguage language = NChardetLanguage.ALL, int maxLength = 1024)
         {
             if (bytes == null || bytes.Length == 0)
                 return null;

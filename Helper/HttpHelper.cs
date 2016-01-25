@@ -51,11 +51,8 @@ namespace Thrinax.Helper
                 httpResponse.LastModified = TimeHelper.ConvertDateTimeInt(httpWebResponse.LastModified);
 
                 string Content = null;
-                //缓冲区长度
-                const int N_CacheLength = 10000;
                 //头部预读取缓冲区，字节形式
                 var bytes = new List<byte>();
-                int count = 0;
                 //头部预读取缓冲区，字符串
                 String cache = string.Empty;
 
@@ -78,15 +75,15 @@ namespace Thrinax.Helper
 
                 try
                 {
-                    while (!(cache.EndsWith("</head>", StringComparison.OrdinalIgnoreCase) || count >= N_CacheLength))
+                    while (true)
                     {
                         var b = (byte)ResponseStream.ReadByte();
-                        if (b < 0) //end of stream
+                        if (b < 0 || b == 255) //end of stream
                             break;
                         bytes.Add(b);
 
-                        count++;
-                        cache += (char)b;
+                        if (!cache.EndsWith("</head>", StringComparison.OrdinalIgnoreCase))
+                            cache += (char)b;
                     }
 
                     // Charset check: input > NChardet > Parser
@@ -120,10 +117,8 @@ namespace Thrinax.Helper
                     if (encode == null)
                         encode = Encoding.Default;
 
-                    //Recode the head and read to end.
-                    var Reader = new StreamReader(ResponseStream, encode);
-                    Content = encode.GetString(bytes.ToArray(), 0, count) + Reader.ReadToEnd();
-                    Reader.Close();
+                    Content = encode.GetString(bytes.ToArray());
+                    ResponseStream.Close();
                 }
                 catch (Exception ex)
                 {
@@ -143,7 +138,7 @@ namespace Thrinax.Helper
                 CookieCollection httpHeaderCookies = SetCookie(httpWebResponse, cookiesDomain);
                 cookies.Add(httpHeaderCookies ?? httpWebResponse.Cookies);
 
-                httpResponse.Content = Content.Replace("", "").Replace("�", "");
+                httpResponse.Content = Content;
             }
             catch
             {
@@ -200,9 +195,9 @@ namespace Thrinax.Helper
             request.Method = "GET";
 
             request.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
-            request.Headers.Add("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4");
-            request.ContentType = string.IsNullOrEmpty(contentType) ? "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" : contentType;
-            request.UserAgent = string.IsNullOrEmpty(userAgent) ? "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.143 Safari/537.36" : userAgent;
+            request.Headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4");
+            request.ContentType = string.IsNullOrEmpty(contentType) ? "application/x-www-form-urlencoded" : contentType;
+            request.UserAgent = string.IsNullOrEmpty(userAgent) ? "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36" : userAgent;
 
             request.Timeout = timeout;
             request.KeepAlive = true;
@@ -245,9 +240,9 @@ namespace Thrinax.Helper
             request.Method = "POST";
 
             request.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
-            request.Headers.Add("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4");
-            request.ContentType = string.IsNullOrEmpty(contentType) ? "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" : contentType;
-            request.UserAgent = string.IsNullOrEmpty(userAgent) ? "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.143 Safari/537.36" : userAgent;
+            request.Headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4");
+            request.ContentType = string.IsNullOrEmpty(contentType) ? "application/x-www-form-urlencoded" : contentType;
+            request.UserAgent = string.IsNullOrEmpty(userAgent) ? "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36" : userAgent;
 
             request.Timeout = timeout;
             request.KeepAlive = true;
