@@ -1,2 +1,2 @@
-# tnidea
-the common lib of other tnidea projects.
+# thrinax
+the common lib of other thrinax projects.
