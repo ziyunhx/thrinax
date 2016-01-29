@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Thrinax.NLP
 {
@@ -172,7 +171,6 @@ namespace Thrinax.NLP
             }
             catch (Exception e)
             {
-                Logger.Error(string.Format("Splite Err:{0} Input:{1}\n{2}", e.Message, Input, e.StackTrace));
                 throw e;
             }
 
