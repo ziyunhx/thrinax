@@ -16,6 +16,7 @@ namespace Thrinax.Helper
         public static Encoding RecogEncoding(byte[] bytes, NChardetLanguage language = NChardetLanguage.ALL)
         {
             string charset = RecogCharset(bytes, language);
+
             if (!string.IsNullOrEmpty(charset))
                 return Encoding.GetEncoding(charset); 
 
@@ -56,12 +57,7 @@ namespace Thrinax.Helper
                 while (true);
             }
             else
-            {
                 detector.HandleData(bytes, bytes.Length, ref charset);
-            }
-
-            if (string.IsNullOrEmpty(charset))
-                detector.DataEnd(ref charset);
 
             return charset;
         }
