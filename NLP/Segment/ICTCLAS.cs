@@ -1,14 +1,13 @@
-﻿using System;
+﻿using SharpICTCLAS;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Thrinax.NLP
+namespace Thrinax.NLP.Segment
 {
-    public class Segment
-    {
-    }
-
     /// <summary>
     /// 基于多层隐马模型
     /// </summary>
@@ -16,7 +15,7 @@ namespace Thrinax.NLP
     /// 原词库：分词速度新闻文档300+每分钟
     /// 增加搜狗2006，人名、地名、成语、网络新名词库后，分词速度新闻文档300+每分钟
     /// </remarks>
-    public class ICTCLASSharp
+    public class ICTCLAS
     {
         static string DataPath = @"data_ws";
         const int nKind = 10; //分词精度1-10，越大精度越高,原始为5
@@ -25,27 +24,27 @@ namespace Thrinax.NLP
 
         public WordSegment wordSegment;
 
-        private ICTCLASSharp()
+        private ICTCLAS()
         {
             wordSegment = new WordSegment();
             string ErrMsg;
-            if (!wordSegment.InitWordSegment(Path.Combine(RuntimeInfo.BaseDirectory, DataPath) + Path.DirectorySeparatorChar, out ErrMsg))
+            if (!wordSegment.InitWordSegment(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DataPath) + Path.DirectorySeparatorChar, out ErrMsg))
             {
                 throw new Exception("SharpICTCLAS分词器初始化失败:" + ErrMsg);
             }
         }
 
-        private static ICTCLASSharp _Instance = null;
+        private static ICTCLAS _Instance = null;
 
-        static ICTCLASSharp Instance
+        static ICTCLAS Instance
         {
             get
             {
                 if ((_Instance) == null)
-                    lock (typeof(ICTCLASSharp))
+                    lock (typeof(ICTCLAS))
                     {
                         if ((_Instance) == null)
-                            _Instance = new ICTCLASSharp();
+                            _Instance = new ICTCLAS();
                     }
                 return _Instance;
             }
@@ -271,8 +270,6 @@ namespace Thrinax.NLP
         /// <param name="DataPath">分词器所需文件的文件夹，空则加载默认</param>
         public static void Reload(string DataPath = null)
         {
-            if (!string.IsNullOrEmpty(DataPath))
-                DataPath = DataPath;
             if (_Instance != null)
                 WordDictionary.ReleaseDict();
             _Instance = null; //which will cause reinit 
