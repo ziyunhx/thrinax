@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections;
 using Thrinax.Data;
+using System.Globalization;
 
 namespace Thrinax.Helper
 {
@@ -86,34 +87,60 @@ namespace Thrinax.Helper
                             cache += (char)b;
                     }
 
-                    // Charset check: input > NChardet > Parser
-                    if (encode == null)
+                    //重写网页编码识别部分代码，优先考虑ContentType内的编码，如果没有，根据网页与自动编码识别来猜测编码，两者不相同则使用人工标注的编码，最后使用默认编码
+                    //1，直接通过ContentType内的编码
+                    try
                     {
-                        string charset = NChardetHelper.RecogCharset(bytes.ToArray());
-                        if (!string.IsNullOrEmpty(charset))
-                            encode = Encoding.GetEncoding(charset);
-
-                        if (encode == null)
+                        string text;
+                        if (!string.IsNullOrEmpty(text = httpWebResponse.ContentType))
                         {
-                            if (httpWebResponse.CharacterSet == "ISO-8859-1" || httpWebResponse.CharacterSet == "zh-cn")
+                            text = text.ToLower(CultureInfo.InvariantCulture);
+                            string[] array = text.Split(new char[] { ';', '=', ' ' });
+                            bool flag = false;
+                            string[] array2 = array;
+                            for (int i = 0; i < array2.Length; i++)
                             {
-                                Match match = Regex.Match(cache, CharsetReg, RegexOptions.IgnoreCase | RegexOptions.Multiline);
-                                if (match.Success)
+                                string text2 = array2[i];
+                                if (text2 == "charset")
+                                    flag = true;
+                                else
                                 {
-                                    try
-                                    {
-                                        charset = match.Groups["Charset"].Value;
-                                        encode = Encoding.GetEncoding(charset);
-                                    }
-                                    catch { }
+                                    if (flag)
+                                        encode = Encoding.GetEncoding(text2);
                                 }
                             }
+                        }
 
-                            if (httpWebResponse.CharacterSet != null && encode == null)
-                                encode = Encoding.GetEncoding(httpWebResponse.CharacterSet);
+                    }
+                    catch { }
+
+                    //2，根据网页与自动编码识别来猜测编码
+                    if (encode == null)
+                    {
+                        Match match = Regex.Match(cache, CharsetReg, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+                        if (match.Success)
+                        {
+                            string Rcharset = match.Groups["Charset"].Value;
+                            string Ncharset = NChardetHelper.RecogCharset(bytes.ToArray(), Thrinax.Data.NChardetLanguage.SIMPLIFIED_CHINESE, 1024);
+
+                            if (!string.IsNullOrEmpty(Ncharset) && Ncharset.ToUpper() == Rcharset.ToUpper())
+                            {
+                                encode = Encoding.GetEncoding(Ncharset);
+                            }
                         }
                     }
 
+                    //3，使用人工标注的编码
+                    if (encode == null && !string.IsNullOrEmpty(encoding))
+                    {
+                        try
+                        {
+                            encode = Encoding.GetEncoding(encoding);
+                        }
+                        catch { }
+                    }
+
+                    //4，使用默认编码
                     if (encode == null)
                         encode = Encoding.Default;
 
