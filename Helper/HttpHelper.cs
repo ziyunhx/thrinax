@@ -87,50 +87,56 @@ namespace Thrinax.Helper
                             cache += (char)b;
                     }
 
-                    //重写网页编码识别部分代码，优先考虑ContentType内的编码，如果没有，根据网页与自动编码识别来猜测编码，两者不相同则使用人工标注的编码，最后使用默认编码
-                    //1，直接通过ContentType内的编码
-                    try
-                    {
-                        string text;
-                        if (!string.IsNullOrEmpty(text = httpWebResponse.ContentType))
-                        {
-                            text = text.ToLower(CultureInfo.InvariantCulture);
-                            string[] array = text.Split(new char[] { ';', '=', ' ' });
-                            bool flag = false;
-                            string[] array2 = array;
-                            for (int i = 0; i < array2.Length; i++)
-                            {
-                                string text2 = array2[i];
-                                if (text2 == "charset")
-                                    flag = true;
-                                else
-                                {
-                                    if (flag)
-                                        encode = Encoding.GetEncoding(text2);
-                                }
-                            }
-                        }
 
-                    }
-                    catch { }
+                    string Ncharset = "";
+                    string Hcharset = "";
+                    string Rcharset = "";
 
-                    //2，根据网页与自动编码识别来猜测编码
+                    //1，使用解析ContentType，解析Html编码声明，自动编码识别三种来猜测编码，选取任意两者相同的编码
                     if (encode == null)
                     {
                         Match match = Regex.Match(cache, CharsetReg, RegexOptions.IgnoreCase | RegexOptions.Multiline);
                         if (match.Success)
-                        {
-                            string Rcharset = match.Groups["Charset"].Value;
-                            string Ncharset = NChardetHelper.RecogCharset(bytes.ToArray(), Thrinax.Data.NChardetLanguage.SIMPLIFIED_CHINESE, 1024);
+                            Rcharset = match.Groups["Charset"].Value;
 
-                            if (!string.IsNullOrEmpty(Ncharset) && Ncharset.ToUpper() == Rcharset.ToUpper())
+                        try
+                        {
+                            string text = "";
+                            if (!string.IsNullOrEmpty(text = httpWebResponse.ContentType))
                             {
-                                encode = Encoding.GetEncoding(Ncharset);
+                                text = text.ToLower(CultureInfo.InvariantCulture);
+                                string[] array = text.Split(new char[] { ';', '=', ' ' });
+                                bool flag = false;
+                                string[] array2 = array;
+                                for (int i = 0; i < array2.Length; i++)
+                                {
+                                    string text2 = array2[i];
+                                    if (text2 == "charset")
+                                        flag = true;
+                                    else
+                                    {
+                                        if (flag)
+                                            Hcharset = text2;
+                                    }
+                                }
                             }
+
                         }
+                        catch { }
+
+                        if (!string.IsNullOrEmpty(Rcharset) && !string.IsNullOrEmpty(Hcharset) && Hcharset.ToUpper() == Rcharset.ToUpper())
+                            encode = Encoding.GetEncoding(Hcharset);
+                        else
+                        {
+                            Ncharset = NChardetHelper.RecogCharset(bytes.ToArray(), Thrinax.Data.NChardetLanguage.CHINESE, -1);
+
+                            if (!string.IsNullOrEmpty(Ncharset) && (Ncharset.ToUpper() == Rcharset.ToUpper() || Ncharset.ToUpper() == Hcharset.ToUpper()))
+                                encode = Encoding.GetEncoding(Ncharset);
+                        }
+
                     }
 
-                    //3，使用人工标注的编码
+                    //2，使用人工标注的编码
                     if (encode == null && !string.IsNullOrEmpty(encoding))
                     {
                         try
@@ -140,7 +146,15 @@ namespace Thrinax.Helper
                         catch { }
                     }
 
-                    //4，使用默认编码
+                    //3，使用单一方式识别出的编码，网页自动识别 > 解析ContentType > 解析Html编码声明
+                    if (encode == null && !string.IsNullOrEmpty(Ncharset))
+                        encode = Encoding.GetEncoding(Ncharset);
+                    if(encode == null && !string.IsNullOrEmpty(Hcharset))
+                        encode = Encoding.GetEncoding(Hcharset);
+                    if (encode == null && !string.IsNullOrEmpty(Rcharset))
+                        encode = Encoding.GetEncoding(Rcharset);
+
+                    //4，使用默认编码，听天由命吧
                     if (encode == null)
                         encode = Encoding.Default;
 
