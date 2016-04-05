@@ -78,10 +78,10 @@ namespace Thrinax.Helper
                 {
                     while (true)
                     {
-                        var b = (byte)ResponseStream.ReadByte();
-                        if (b < 0 || b == 255) //end of stream
+                        var b = ResponseStream.ReadByte();
+                        if (b < 0) //end of stream
                             break;
-                        bytes.Add(b);
+                        bytes.Add((byte)b);
 
                         if (!cache.EndsWith("</head>", StringComparison.OrdinalIgnoreCase))
                             cache += (char)b;
