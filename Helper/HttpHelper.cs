@@ -35,7 +35,7 @@ namespace Thrinax.Helper
         /// <param name="contentType"></param>
         /// <param name="timeout"></param>
         /// <returns></returns>
-        public static HttpResult HttpRequest(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null, IWebProxy proxy = null, string encoding = null, string contentType = null, int timeout = 8000)
+        public static HttpResult HttpRequest(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null, IWebProxy proxy = null, string encoding = null, string contentType = null, int timeout = 8000, Dictionary<string, string> headers = null)
         {
             HttpResult httpResponse = new HttpResult();
 
@@ -43,9 +43,9 @@ namespace Thrinax.Helper
             {
                 HttpWebResponse httpWebResponse = null;
                 if (!string.IsNullOrEmpty(postData) || (!string.IsNullOrEmpty(method) && method.ToUpper() == "POST"))
-                    httpWebResponse = CreatePostHttpResponse(url, postData, timeout, userAgent, cookies, referer, proxy, contentType);
+                    httpWebResponse = CreatePostHttpResponse(url, postData, timeout, userAgent, cookies, referer, proxy, contentType, headers);
                 else
-                    httpWebResponse = CreateGetHttpResponse(url, timeout, userAgent, cookies, referer, proxy, contentType);
+                    httpWebResponse = CreateGetHttpResponse(url, timeout, userAgent, cookies, referer, proxy, contentType, headers);
 
                 httpResponse.Url = httpWebResponse.ResponseUri.ToString();
                 httpResponse.HttpCode = (int)httpWebResponse.StatusCode;
@@ -86,7 +86,6 @@ namespace Thrinax.Helper
                         if (!cache.EndsWith("</head>", StringComparison.OrdinalIgnoreCase))
                             cache += (char)b;
                     }
-
 
                     string Ncharset = "";
                     string Hcharset = "";
@@ -181,9 +180,10 @@ namespace Thrinax.Helper
 
                 httpResponse.Content = Content;
             }
-            catch
+            catch(Exception ex)
             {
-                httpResponse.Content = string.Empty;
+                httpResponse.Content = ex.ToString();
+                httpResponse.HttpCode = DetermineResultStatus(ex);                
             }
             return httpResponse;
         }
@@ -203,9 +203,9 @@ namespace Thrinax.Helper
         /// <param name="encoding"></param>
         /// <param name="contentType"></param>
         /// <returns></returns>
-        public static string GetHttpContent(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null, IWebProxy proxy = null, string encoding = null, string contentType = null, int timeout = 8000)
+        public static string GetHttpContent(string url, string postData = null, CookieContainer cookies = null, string userAgent = null, string referer = null, string cookiesDomain = null, Encoding encode = null, string method = null, IWebProxy proxy = null, string encoding = null, string contentType = null, int timeout = 8000, Dictionary<string, string> headers = null)
         {
-            return HttpHelper.HttpRequest(url, postData, cookies, userAgent, referer, cookiesDomain, encode, method, proxy, encoding, contentType, timeout).Content;
+            return HttpHelper.HttpRequest(url, postData, cookies, userAgent, referer, cookiesDomain, encode, method, proxy, encoding, contentType, timeout, headers).Content;
         }
 
         /// <summary>
@@ -217,7 +217,7 @@ namespace Thrinax.Helper
         /// <param name="cookies"></param>
         /// <param name="referer"></param>
         /// <returns></returns>
-        public static HttpWebResponse CreateGetHttpResponse(string url, int timeout = 8000, string userAgent = null, CookieContainer cookies = null, string referer = null, IWebProxy proxy = null, string contentType = null)
+        public static HttpWebResponse CreateGetHttpResponse(string url, int timeout = 8000, string userAgent = null, CookieContainer cookies = null, string referer = null, IWebProxy proxy = null, string contentType = null, Dictionary<string, string> headers = null)
         {
             HttpWebRequest request = null;
             if (url.StartsWith("https", StringComparison.OrdinalIgnoreCase))
@@ -237,6 +237,15 @@ namespace Thrinax.Helper
 
             request.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
             request.Headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4");
+
+            if (headers != null && headers.Count > 0)
+            {
+                foreach (var header in headers)
+                {
+                    request.Headers.Add(header.Key, header.Value);
+                }
+            }
+
             request.ContentType = string.IsNullOrEmpty(contentType) ? "application/x-www-form-urlencoded" : contentType;
             request.UserAgent = string.IsNullOrEmpty(userAgent) ? "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36" : userAgent;
 
@@ -263,7 +272,7 @@ namespace Thrinax.Helper
         /// <param name="cookies"></param>
         /// <param name="referer"></param>
         /// <returns></returns>
-        public static HttpWebResponse CreatePostHttpResponse(string url, string postData, int timeout = 8000, string userAgent = null, CookieContainer cookies = null, string referer = null, IWebProxy proxy = null, string contentType = null)
+        public static HttpWebResponse CreatePostHttpResponse(string url, string postData, int timeout = 8000, string userAgent = null, CookieContainer cookies = null, string referer = null, IWebProxy proxy = null, string contentType = null, Dictionary<string,string> headers = null)
         {
             HttpWebRequest request = null;
             //如果是发送HTTPS请求  
@@ -282,6 +291,15 @@ namespace Thrinax.Helper
 
             request.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
             request.Headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4");
+
+            if (headers != null && headers.Count > 0)
+            {
+                foreach (var header in headers)
+                {
+                    request.Headers.Add(header.Key, header.Value);
+                }
+            }
+
             request.ContentType = string.IsNullOrEmpty(contentType) ? "application/x-www-form-urlencoded" : contentType;
             request.UserAgent = string.IsNullOrEmpty(userAgent) ? "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36" : userAgent;
 
@@ -467,6 +485,35 @@ namespace Thrinax.Helper
                 }
             }
             return cookieContainer;
+        }
+
+        /// <summary>
+        ///     根据异常内容判断状态类型
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <returns></returns>
+        private static int DetermineResultStatus(Exception ex)
+        {
+            string Msg = ex.Message.ToLower();
+            if (Msg.Contains("超时") || Msg.Contains("timeout") || Msg.Contains("timed out")
+                                   || Msg.Contains("502"))
+            {
+                return 502;
+            }
+            if (Msg.Contains("dns") || Msg.Contains("resolved"))
+            {
+                return 404;
+            }
+            if (Msg.Contains("404"))
+            {
+                return 404;
+            }
+            if (Msg.Contains("500"))
+            {
+                return 500;
+            }
+
+            return 500;
         }
     }
 }
