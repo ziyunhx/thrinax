@@ -1,2 +1,2 @@
 # thrinax
-the common lib of other thrinax projects.
+A lib which is used of Chinese unstructured text capture and analysis.
