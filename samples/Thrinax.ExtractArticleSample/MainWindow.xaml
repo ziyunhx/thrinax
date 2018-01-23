@@ -1,0 +1,20 @@
+﻿<Window x:Class="Thrinax.ExtractArticleSample.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Thrinax.ExtractArticleSample"
+        mc:Ignorable="d"
+        Title="Extract Article Sample" Height="556.144" Width="756.542" WindowStartupLocation="CenterOwner">
+    <Grid>
+        <Button Name="btn_Extract" Content="Extract" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Width="75" Click="btn_Extract_Click"/>
+        <Label Content="UrL:" HorizontalAlignment="Left" Margin="37,10,0,0" VerticalAlignment="Top"/>
+        <TextBox Name="txt_url" Height="20" Margin="73,10,101,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top"/>
+        <Label Content="Title:" HorizontalAlignment="Left" Margin="32,38,0,0" VerticalAlignment="Top" Width="38"/>
+        <TextBox Name="txt_title" Height="20" Margin="73,41,10,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top"/>
+        <Label Content="PubDate:" HorizontalAlignment="Left" Margin="10,67,0,0" VerticalAlignment="Top"/>
+        <TextBox  Name="txt_pubdate" Height="20" Margin="73,73,10,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top"/>
+        <Label Content="Content:" HorizontalAlignment="Left" Margin="15,102,0,0" VerticalAlignment="Top"/>
+        <TextBox Name="txt_content" Margin="10,133,10,10" TextWrapping="Wrap" Text=""/>
+    </Grid>
+</Window>

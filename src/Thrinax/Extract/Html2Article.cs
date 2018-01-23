@@ -15,10 +15,14 @@
  * See the License for the specific language governing permissions and limitations under the License.
 */
 
+using HtmlAgilityPack;
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using Thrinax.Models;
+using Thrinax.Utility;
+using System.Linq;
 
 namespace Thrinax.Extract
 {
@@ -85,6 +89,7 @@ namespace Thrinax.Extract
 
         /// <summary>
         /// 从给定的Html原始文本中获取正文信息
+        /// 只有单条链接情况，正文缺少推倒去重复
         /// </summary>
         /// <param name="html"></param>
         /// <returns></returns>
@@ -123,17 +128,16 @@ namespace Thrinax.Extract
             //  <a href='http://www.baidu.com' class='test'>
             body = Regex.Replace(body, @"(<[^<>]+)\s*\n\s*", FormatTag);
 
-            string content;
-            string contentWithTags;
-            GetContent(body, out content, out contentWithTags);
+            Article article = new Article();
 
-            Article article = new Article
-            {
-                Title = GetTitle(html),
-                PubDate = GetPublishDate(body),
-                Content = content,
-                HtmlContent = contentWithTags
-            };
+            article.Title = GetTitle(html);
+            string dateTimeStr = GetPublishDate(body);
+
+            article.PubDate =DateTimeParser.Parser(dateTimeStr);
+            article.HtmlContent = GetHtmlContent(body, article.Title, dateTimeStr);
+
+            if (!string.IsNullOrWhiteSpace(article.HtmlContent))
+                article.Content = HTMLCleaner.CleanHTML(article.HtmlContent, false);
 
             return article;
         }
@@ -193,7 +197,7 @@ namespace Thrinax.Extract
         /// </summary>
         /// <param name="html"></param>
         /// <returns></returns>
-        private static DateTime GetPublishDate(string html)
+        private static string GetPublishDate(string html)
         {
             // 过滤html标签，防止标签对日期提取产生影响
             string text = Regex.Replace(html, "(?is)<.*?>", "");
@@ -202,7 +206,6 @@ namespace Thrinax.Extract
                 @"((\d{4}|\d{2})(\-|\/)\d{1,2}\3\d{1,2})(\s?\d{2}:\d{2})?|(\d{4}年\d{1,2}月\d{1,2}日)(\s?\d{2}:\d{2})?",
                 RegexOptions.IgnoreCase);
 
-            DateTime result = new DateTime(1900, 1, 1);
             if (match.Success)
             {
                 try
@@ -216,38 +219,47 @@ namespace Thrinax.Extract
                             break;
                         }
                     }
-                    // 对中文日期的处理
-                    if (dateStr.Contains("年"))
-                    {
-                        StringBuilder sb = new StringBuilder();
-                        foreach (var ch in dateStr)
-                        {
-                            if (ch == '年' || ch == '月')
-                            {
-                                sb.Append("/");
-                                continue;
-                            }
-                            if (ch == '日')
-                            {
-                                sb.Append(' ');
-                                continue;
-                            }
-                            sb.Append(ch);
-                        }
-                        dateStr = sb.ToString();
-                    }
-                    result = Convert.ToDateTime(dateStr);
+                    return dateStr;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex);
                 }
-                if (result.Year < 1900)
-                {
-                    result = new DateTime(1900, 1, 1);
-                }
             }
-            return result;
+            return "";
+        }
+
+        public static string GetHtmlContent(string bodyText, string Title, string dateTimeStr)
+        {
+            string baseHtmlContent = bodyText;
+
+            //首先通过Html的div标签拆解元素打分
+            List<Tuple<string, double>> listNodes = SplitHtmlTextByBlockElement(bodyText);
+            if (listNodes != null && listNodes.Count > 0)
+                baseHtmlContent = listNodes.OrderByDescending(f => f.Item2).FirstOrDefault().Item1;
+
+            //获取打分最高的元素，去除 H1, 包含 Title 和 dateTimeStr 的行
+            if (Regex.IsMatch(baseHtmlContent, @"<\s*h1(\s|>)", RegexOptions.IgnoreCase))
+            {
+                HtmlNode htmlNode = HtmlUtility.getSafeHtmlRootNode(baseHtmlContent, true, true);
+                HtmlNodeCollection Ps = htmlNode.SelectNodes("//h1");
+                if (Ps != null && Ps.Count > 0)
+                    foreach (HtmlNode node in Ps)
+                        try
+                        {
+                            node.RemoveAll();
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+
+                baseHtmlContent = htmlNode.OuterHtml;
+            }
+
+            //baseHtmlContent.Replace(Title, "");
+            //baseHtmlContent.Replace(dateTimeStr, "");
+
+            return baseHtmlContent;
         }
 
         /// <summary>
@@ -356,6 +368,85 @@ namespace Thrinax.Extract
             content = System.Web.HttpUtility.HtmlDecode(content);
             // 输出带标签文本
             contentWithTags = orgSb.ToString();
+        }
+
+        /// <summary>
+        /// 通过Html常用的块状元素来拆分数据块，第一阶段先用 div
+        /// div 默认会有15分的基础分，子元素出现一次div 扣 3 分
+        /// 内部包含的正文字每20个得一分，出现一个 a 标签扣除一分
+        /// 正文中连续的3个空行会扣除一分，每多一个多扣0.2分
+        /// </summary>
+        /// <param name="htmlContent"></param>
+        /// <returns></returns>
+        public static List<Tuple<string, double>> SplitHtmlTextByBlockElement(string htmlContent)
+        {
+            if (string.IsNullOrWhiteSpace(htmlContent))
+                return null;
+
+            HtmlNode itempagenode = HtmlUtility.getSafeHtmlRootNode(htmlContent, true, true);
+            var itemNodes = itempagenode.SelectNodes("//div");
+
+            if (itemNodes == null || itemNodes.Count == 0)
+                return null;
+
+            List<Tuple<string, double>> itemNodeScores = new List<Tuple<string, double>>();
+            foreach (var itemNode in itemNodes)
+            {
+                double baseScore = 15;
+
+                HtmlNode innerNode = HtmlUtility.getSafeHtmlRootNode(itemNode.OuterHtml, true, true);
+
+                //子元素出现一次div且内容不为空的 扣 3 分
+                var innerDivs = innerNode.SelectNodes("//div");
+                if (innerDivs != null && innerDivs.Count > 1)
+                {
+                    foreach (var innerDiv in innerDivs)
+                    {
+                        if(!string.IsNullOrWhiteSpace(innerDiv.InnerText))
+                            baseScore -= 3;
+                    }
+                }
+
+                //子元素出现一次a 扣 1 分
+                var inneras = innerNode.SelectNodes("//a");
+                if (inneras != null && inneras.Count > 0)
+                {
+                    baseScore -= inneras.Count;
+                }
+
+                //获取正文部分，计算字数
+                string innerText = itemNode.InnerText;
+                if (!string.IsNullOrWhiteSpace(innerText))
+                {
+                    string innerTextWithoutBlack = Regex.Replace(innerText, @"\s", "");
+                    if (!string.IsNullOrWhiteSpace(innerTextWithoutBlack) && innerTextWithoutBlack.Length > 0)
+                        baseScore += (double)innerTextWithoutBlack.Length / 20;
+                }
+                else
+                    continue;
+
+                //计算正文中的空行，连续的3个空行会扣除一分，每多一个多扣0.2分
+                string[] orgLines = innerText.Split('\n');
+                int currentBlackCount = 0;
+                foreach (string orgLine in orgLines)
+                {
+                    if (string.IsNullOrWhiteSpace(orgLine))
+                    {
+                        currentBlackCount++;
+                        if (currentBlackCount == 3)
+                            baseScore--;
+                        else if (currentBlackCount > 3)
+                            baseScore -= 0.2;
+                    }
+                    else
+                        currentBlackCount = 0;
+                }
+
+                Tuple<string, double> tuple = new Tuple<string, double>(itemNode.InnerHtml, baseScore);
+                itemNodeScores.Add(tuple);
+            }
+
+            return itemNodeScores;
         }
     }
 }

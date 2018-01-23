@@ -2,6 +2,7 @@ using HtmlAgilityPack;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -313,7 +314,7 @@ namespace Thrinax.Utility
             return cleanedText;
         }
         private static ConcurrentDictionary<string,Regex> removeTagRegDictionary =new ConcurrentDictionary<string, Regex>();
-        private static ConcurrentDictionary<string, Regex> removeInnerRegDictionary = new ConcurrentDictionary<string, Regex>(); 
+        private static ConcurrentDictionary<string, List<Regex>> removeInnerRegDictionary = new ConcurrentDictionary<string, List<Regex>>();
         /// <summary>
         /// 去除指定的Html标签
         /// </summary>
@@ -324,30 +325,48 @@ namespace Thrinax.Utility
         public static string StripHtmlTag(string HTML, string Tag, bool RemoveInnerHTML)
         {
             if (string.IsNullOrEmpty(Tag) || string.IsNullOrEmpty(HTML)) return HTML;
-            Regex replacereg;
+            List<Regex> replaceregs;
             if (RemoveInnerHTML)
             {
                 if (!removeInnerRegDictionary.ContainsKey(Tag))
                 {
+                    List<Regex> regexs = new List<Regex>();
                     string regexStr = string.Format(@"<\s*{0}[^>]*?>[\s\S]*?</\s*{0}\s*>", Tag);
-                    Regex regex = new Regex(regexStr,RegexOptions.IgnoreCase|RegexOptions.Compiled);
-                    removeInnerRegDictionary.TryAdd(Tag,regex);
+                    Regex regex = new Regex(regexStr, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                    regexs.Add(regex);
+
+                    string regexStr2 = string.Format(@"<\s*{0}[^>]*?/\s*>", Tag);
+                    Regex regex2 = new Regex(regexStr2, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                    regexs.Add(regex2);
+
+                    string regexStr3 = string.Format(@"<\s*{0}[^>]*?>", Tag);
+                    Regex regex3 = new Regex(regexStr3, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                    regexs.Add(regex3);
+
+                    removeInnerRegDictionary.TryAdd(Tag, regexs);
                 }
-                replacereg = removeInnerRegDictionary[Tag];
+                replaceregs = removeInnerRegDictionary[Tag];
             }
             else
             {
                 if (!removeTagRegDictionary.ContainsKey(Tag))
                 {
                     string regexStr = string.Format(@"<(?:/)?\s*{0}[^>]*?>", Tag);
-                    Regex regex = new Regex(regexStr,RegexOptions.IgnoreCase|RegexOptions.Compiled);
+                    Regex regex = new Regex(regexStr, RegexOptions.IgnoreCase | RegexOptions.Compiled);
                     removeTagRegDictionary.TryAdd(Tag, regex);
                 }
-                replacereg = removeTagRegDictionary[Tag];
+                replaceregs = new List<Regex>() { removeTagRegDictionary[Tag] };
             }
 
+            if (replaceregs != null && replaceregs.Count > 0)
+            {
+                foreach (Regex regex in replaceregs)
+                {
+                    HTML = regex.Replace(HTML, string.Empty);
+                }
+            }
 
-            return replacereg.Replace(HTML, string.Empty);
+            return HTML;
         }
 
         /// <summary>
@@ -365,9 +384,9 @@ namespace Thrinax.Utility
             {
                 string regexStr = string.Format(@"\s*{0}\s*=""[^""]*?""\s*", Tag);
                 Regex regex = new Regex(regexStr, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-                removeInnerRegDictionary.TryAdd(Tag, regex);
+                removeInnerRegDictionary.TryAdd(Tag, new List<Regex>() { regex });
             }
-            replacereg = removeInnerRegDictionary[Tag];
+            replacereg = removeInnerRegDictionary[Tag].FirstOrDefault();
 
             return replacereg.Replace(HTML, " ");
         }
