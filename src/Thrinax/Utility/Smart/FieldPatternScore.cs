@@ -1,7 +1,7 @@
 ﻿using System;
 using Thrinax.Utility;
 
-namespace Thrinax
+namespace Thrinax.Utility.Smart
 {
     /// <summary>
     /// 记录一个各字段XPath的组合及其可能性得分

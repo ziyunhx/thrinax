@@ -2,7 +2,7 @@
 using HtmlAgilityPack;
 using Thrinax.Utility;
 
-namespace Thrinax
+namespace Thrinax.Utility.Smart
 {
     public class ItemPageMessage
     {

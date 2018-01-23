@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using Thrinax.Chardet.NChardet;
 using Thrinax.Enums;
 
 namespace Thrinax.Chardet

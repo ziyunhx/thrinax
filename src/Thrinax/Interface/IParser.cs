@@ -1,4 +1,6 @@
 ﻿using System;
+using Thrinax.Models;
+
 namespace Thrinax.Interface
 {
     public interface IParser

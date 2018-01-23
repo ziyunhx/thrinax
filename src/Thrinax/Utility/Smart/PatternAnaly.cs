@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using HtmlAgilityPack;
 using Thrinax.Models;
 
-namespace Thrinax
+namespace Thrinax.Utility.Smart
 {
     public class PatternAnaly
     {

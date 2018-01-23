@@ -1,7 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <Description>A csharp crawler lib.</Description>
+    <AssemblyTitle>Thrinax</AssemblyTitle>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <VersionPrefix>1.0.1</VersionPrefix>
+    <Authors>Carey Tzou</Authors>
+    <Company>Taikor</Company>
+    <Copyright>Copyright © Taikor 2005-2018</Copyright>
+    <AssemblyName>Thrinax</AssemblyName>
+    <PackageId>Thrinax</PackageId>
+    <PackageTags>Thrinax;Crawler;Crawl</PackageTags>
+    <PackageReleaseNotes>add dotnet core 2.0 support.</PackageReleaseNotes>
+    <PackageProjectUrl>http://www.tnidea.com/categories/Thrinax/</PackageProjectUrl>
+    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Version>1.0.1</Version>
+    <SignAssembly>False</SignAssembly>
+    <RepositoryUrl>https://github.com/ziyunhx/thrinax</RepositoryUrl>
+    <FileVersion>1.0.1.1418</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,20 +30,19 @@
     <Folder Include="Interface\" />
     <Folder Include="Configs\" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="AngleSharp" Version="0.9.9.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="HtmlAgilityPack" Version="1.6.15" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
-    <PackageReference Include="Accord.MachineLearning" Version="3.8.0" />
+	<PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Remove="Parser\[error]SmartParser.cs" />
     <Compile Remove="Utility\ImageUtility.cs" />
     <Compile Remove="Parser\FalcoAParser.cs" />
     <Compile Remove="Parser\AIParser.cs" />
     <Compile Remove="Parser\XMLParser.cs" />
-    <Compile Remove="Utility\Smart\[error]SoftStrategy.cs" />
   </ItemGroup>
 </Project>

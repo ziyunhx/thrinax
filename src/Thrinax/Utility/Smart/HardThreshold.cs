@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace Thrinax
+namespace Thrinax.Utility.Smart
 {
     /// <summary>
     /// 准入规则。不过不再需要这些杂七杂八的东西了，只要给我留下前面怎么筛选的数字就好。比如floor

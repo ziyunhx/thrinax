@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Thrinax
+namespace Thrinax.Models
 {
     /// <summary>
     /// Article list.

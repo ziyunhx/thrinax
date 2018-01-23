@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Thrinax.Interface;
+using Thrinax.Models;
 using Thrinax.Utility;
 
 namespace Thrinax.Parser

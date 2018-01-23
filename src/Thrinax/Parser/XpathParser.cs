@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Thrinax.Http;
 using Thrinax.Interface;
+using Thrinax.Models;
 using Thrinax.Utility;
 
 namespace Thrinax.Parser

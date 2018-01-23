@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Thrinax.Enums;
+using Thrinax.Models;
 
-namespace Thrinax
+namespace Thrinax.Utility.Smart
 {
     /// <summary>
     /// List页各字段的XPath

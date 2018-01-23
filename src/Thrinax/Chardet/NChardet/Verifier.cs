@@ -1,4 +1,4 @@
-﻿namespace Thrinax
+﻿namespace Thrinax.Chardet.NChardet
 {
 	/// <summary>
 	/// Description of Verifier.

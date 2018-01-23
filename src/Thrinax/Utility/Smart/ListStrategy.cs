@@ -2,7 +2,7 @@
 using HtmlAgilityPack;
 using Thrinax.Utility;
 
-namespace Thrinax
+namespace Thrinax.Utility.Smart
 {
     /// <summary>
     /// 各类网站模式识别的全部参数及相关方法
@@ -163,62 +163,6 @@ namespace Thrinax
         {
             return ValidateTitle(XPathUtility.InnerTextNonDescendants(Title)) && !(Title.Attributes["href"] == null) && HTMLCleaner.isUrlGood(Title.Attributes["href"].Value);
         }
-
-        ///// <summary>
-        ///// 验证一个List的模式是否能应用于某一个页面（只是检查是否明显不可能）
-        ///// </summary>
-        ///// <param name="Url"></param>
-        ///// <param name="HTML"></param>
-        ///// <param name="XPath"></param>
-        ///// <param name="MediaType"></param>
-        ///// <param name="Language"></param>
-        ///// <returns></returns>
-        //public bool ValidateListXPath(string Url, string HTML, ListPagePattern listPagePattern)
-        //{
-        //    //获取root节点（有些网站页面不带html标签的，直接从head开始写）
-        //    HtmlNode rootNode = HtmlUtility.getSafeHtmlRootNode(HTML);
-        //    if (rootNode == null)
-        //        return false;
-
-        //    return ValidateListXPath(Url, rootNode, listPagePattern);
-        //}
-
-        ///// <summary>
-        ///// 验证一个List的模式是否能应用于某一个页面（只是检查是否明显不可能）
-        ///// </summary>
-        ///// <param name="Url"></param>
-        ///// <param name="RootNode"></param>
-        ///// <param name="XPath"></param>
-        ///// <param name="MediaType"></param>
-        ///// <param name="Language"></param>
-        ///// <returns></returns>
-        //public bool ValidateListXPath(string Url, HtmlNode RootNode, ListPagePattern listPagePattern)
-        //{
-        //    if (string.IsNullOrEmpty(Url) || RootNode == null || listPagePattern == null) return false;
-
-        //    Article[] Content = ExtractContent(Url, RootNode, listPagePattern.Path);
-        //    if (Content == null || Content.Length < 3) return false;
-
-        //    int TitleCount = 0, DateCount = 0, ViewCount = 0, ReplyCount = 0, MediaCount = 0, AuthorCount = 0;
-        //    foreach (Article ele in Content)
-        //    {
-        //        if (!string.IsNullOrEmpty(ele.Title) && !string.IsNullOrEmpty(ele.Url)) TitleCount++;
-        //        if (!string.IsNullOrEmpty(listPagePattern.Path.DateXPath) && ele.Pubdate != null) DateCount++;
-        //        if (!string.IsNullOrEmpty(listPagePattern.Path.ViewXPath) && ele.View >= 0) ViewCount++;
-        //        if (!string.IsNullOrEmpty(listPagePattern.Path.ReplyXPath) && ele.Reply >= 0) ReplyCount++;
-        //        if (!string.IsNullOrEmpty(listPagePattern.Path.MediaNameXPath) && !string.IsNullOrEmpty(ele.MediaName)) MediaCount++;
-        //        if (!string.IsNullOrEmpty(listPagePattern.Path.AuthorXPath) && !string.IsNullOrEmpty(ele.Author)) AuthorCount++;
-        //    }
-
-        //    if (TitleCount < Content.Length * 0.9) return false;
-        //    if (!string.IsNullOrEmpty(listPagePattern.Path.DateXPath) && DateCount < Content.Length * 0.9) return false;
-        //    if (!string.IsNullOrEmpty(listPagePattern.Path.ViewXPath) && ViewCount < Content.Length * 0.9) return false;
-        //    if (!string.IsNullOrEmpty(listPagePattern.Path.ReplyXPath) && ReplyCount < Content.Length * 0.9) return false;
-        //    if (!string.IsNullOrEmpty(listPagePattern.Path.MediaNameXPath) && MediaCount < Content.Length * 0.9) return false;
-        //    if (!string.IsNullOrEmpty(listPagePattern.Path.AuthorXPath) && AuthorCount < Content.Length * 0.9) return false;
-
-        //    return true;
-        //}
 
         public override string ToString()
         {

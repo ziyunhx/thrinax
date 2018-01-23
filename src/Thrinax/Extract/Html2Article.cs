@@ -18,6 +18,7 @@
 using System;
 using System.Text;
 using System.Text.RegularExpressions;
+using Thrinax.Models;
 
 namespace Thrinax.Extract
 {

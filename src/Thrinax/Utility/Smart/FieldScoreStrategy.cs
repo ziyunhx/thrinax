@@ -7,7 +7,7 @@ using Thrinax.Enums;
 using Thrinax.Models;
 using Thrinax.Utility;
 
-namespace Thrinax
+namespace Thrinax.Utility.Smart
 {
     /// <summary>
     /// 保存需要提取的字段的统计特征，便于提取潜在的Node

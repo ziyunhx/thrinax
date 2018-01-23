@@ -1,7 +1,8 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thrinax", "Thrinax/Thrinax.csproj", "{50EFA07E-DF14-404B-9944-7C0E1DC471D5}"
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thrinax", "Thrinax\Thrinax.csproj", "{69502407-4D50-4AF1-9756-10EFCAFD3CB5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,9 +10,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{50EFA07E-DF14-404B-9944-7C0E1DC471D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{50EFA07E-DF14-404B-9944-7C0E1DC471D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{50EFA07E-DF14-404B-9944-7C0E1DC471D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{50EFA07E-DF14-404B-9944-7C0E1DC471D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69502407-4D50-4AF1-9756-10EFCAFD3CB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69502407-4D50-4AF1-9756-10EFCAFD3CB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69502407-4D50-4AF1-9756-10EFCAFD3CB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69502407-4D50-4AF1-9756-10EFCAFD3CB5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7763E6E5-62E2-444B-9017-136EE0BE7065}
 	EndGlobalSection
 EndGlobal

@@ -112,7 +112,7 @@ namespace Thrinax.Utility
                 if (temp.Contains(Title))
                     Content = Content.Substring(0, Math.Min(Title.Length * 5, temp.Length)).Replace(Title, "") + Content.Substring(Math.Min(Title.Length * 5, temp.Length));
             }
-            temp = Content;
+            Content = Content.Replace("£¨", "(").Replace("£©", ")");
             while (Content.Length > 0)
             {
                 char[] leftb = new char[1];

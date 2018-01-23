@@ -1,5 +1,6 @@
 ﻿using System;
-namespace Thrinax
+
+namespace Thrinax.Models
 {
     public class XpathPattern
     {

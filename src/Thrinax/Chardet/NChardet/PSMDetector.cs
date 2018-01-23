@@ -1,7 +1,7 @@
 ﻿using System;
 using Thrinax.Enums;
 
-namespace Thrinax
+namespace Thrinax.Chardet.NChardet
 {
     /// <summary>
     /// Description of PSMDetector.
