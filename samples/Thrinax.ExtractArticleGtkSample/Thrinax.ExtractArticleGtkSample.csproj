@@ -61,9 +61,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Thrinax\Thrinax.csproj">
-      <Project>{90E9CAA1-35EB-4988-8638-90A5B7F3C41B}</Project>
-      <Name>Thrinax</Name>
+    <ProjectReference Include="..\..\src\Thrinax\Thrinax%28net452%29.csproj">
+      <Project>{2C6BDB46-7861-41A7-A9ED-2BDB80F018F1}</Project>
+      <Name>Thrinax(net452)</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
