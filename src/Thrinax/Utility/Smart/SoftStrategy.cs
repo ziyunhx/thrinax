@@ -8,8 +8,8 @@ using Newtonsoft.Json;
 using Thrinax.Enums;
 using Thrinax.Parser;
 using Thrinax.Utility;
-using SVM;
 using Thrinax.Models;
+using Thrinax.Utility.SVM;
 
 namespace Thrinax.Utility.Smart
 {

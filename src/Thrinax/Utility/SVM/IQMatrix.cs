@@ -2,7 +2,7 @@
 /// A .NET Support Vector Machine library adapted from libsvm
 /// Copyright ©  Matthew Johnson 2009
 /// </summary>
-namespace SVM
+namespace Thrinax.Utility.SVM
 {
 	internal interface IQMatrix
 	{
