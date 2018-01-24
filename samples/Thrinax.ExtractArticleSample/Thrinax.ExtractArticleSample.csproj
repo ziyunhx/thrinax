@@ -114,6 +114,10 @@
       <Project>{1980b082-421f-4c7a-9145-fcd8b4cdc558}</Project>
       <Name>Thrinax%28compatible%29</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\Thrinax\Thrinax.csproj">
+      <Project>{84d1acd6-713f-4f16-90f0-b0e376429587}</Project>
+      <Name>Thrinax</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
