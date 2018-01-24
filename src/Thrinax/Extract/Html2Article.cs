@@ -27,12 +27,7 @@ using System.Linq;
 namespace Thrinax.Extract
 {
     /// <summary>
-    /// 解析Html页面的文章正文内容,基于文本密度的HTML正文提取类
-    /// Date:   2012/12/30
-    /// Update: 
-    ///     2013/7/10   优化文章头部分析算法，优化
-    ///     2014/4/25   添加Html代码中注释过滤的正则
-    ///         
+    /// 解析Html页面的文章正文内容,基于文本密度的HTML正文提取类   
     /// </summary>
     public class Html2Article
     {
@@ -47,44 +42,6 @@ namespace Thrinax.Extract
             // 针对链接密集型的网站的处理，主要是门户类的网站，降低链接干扰
             new[] { @"(?is)</a>", "</a>\n"}
         };
-
-        private static bool _appendMode = false;
-        /// <summary>
-        /// 是否使用追加模式，默认为false
-        /// 使用追加模式后，会将符合过滤条件的所有文本提取出来
-        /// </summary>
-        public static bool AppendMode
-        {
-            get { return _appendMode; }
-            set { _appendMode = value; }
-        }
-
-        private static int _depth = 6;
-        /// <summary>
-        /// 按行分析的深度，默认为6
-        /// </summary>
-        public static int Depth
-        {
-            get { return _depth; }
-            set { _depth = value; }
-        }
-
-        private static int _limitCount = 180;
-        /// <summary>
-        /// 字符限定数，当分析的文本数量达到限定数则认为进入正文内容
-        /// 默认180个字符数
-        /// </summary>
-        public static int LimitCount
-        {
-            get { return _limitCount; }
-            set { _limitCount = value; }
-        }
-
-        // 确定文章正文头部时，向上查找，连续的空行到达_headEmptyLines，则停止查找
-        private static int _headEmptyLines = 2;
-        // 用于确定文章结束的字符数
-        private static int _endLimitCharCount = 10;
-
         #endregion
 
         /// <summary>
@@ -130,10 +87,10 @@ namespace Thrinax.Extract
 
             Article article = new Article();
 
-            article.Title = GetTitle(html);
+            article.Title = Regex.Replace(GetTitle(html), @"\s", "");
             string dateTimeStr = GetPublishDate(body);
 
-            article.PubDate =DateTimeParser.Parser(dateTimeStr);
+            article.PubDate = DateTimeParser.Parser(dateTimeStr);
             article.HtmlContent = GetHtmlContent(body, article.Title, dateTimeStr);
 
             if (!string.IsNullOrWhiteSpace(article.HtmlContent))
@@ -141,6 +98,8 @@ namespace Thrinax.Extract
 
             return article;
         }
+
+
 
         /// <summary>
         /// 格式化标签，剔除匹配标签中的回车符
@@ -199,6 +158,11 @@ namespace Thrinax.Extract
         /// <returns></returns>
         private static string GetPublishDate(string html)
         {
+            if (string.IsNullOrWhiteSpace(html))
+                return "";
+
+            string maybeDateStr = @"0123456789分钟前小时秒半天昨年月日期间发表于布稿出:：/-.更新上线星期周";
+
             // 过滤html标签，防止标签对日期提取产生影响
             string text = Regex.Replace(html, "(?is)<.*?>", "");
             Match match = Regex.Match(
@@ -226,154 +190,48 @@ namespace Thrinax.Extract
                     Console.WriteLine(ex);
                 }
             }
+            else
+            {
+                //解析所有文本的块，获取包含maybeDateStr的字符串，对长短和命中率进行打分排序
+                HtmlNode htmlNode = HtmlUtility.getSafeHtmlRootNode(html, true, true);
+                var itemDateNodes = htmlNode.SelectNodes("//*");
+                if (itemDateNodes != null && itemDateNodes.Count > 0)
+                {
+                    Dictionary<string, double> dateStrDic = new Dictionary<string, double>();
+                    foreach (var itemDateNode in itemDateNodes)
+                    {
+                        string _itemDateText = Regex.Replace(itemDateNode.InnerText, @"\s", "");
+                        if (!string.IsNullOrWhiteSpace(_itemDateText) && maybeDateStr.Any(f=> _itemDateText.Contains(f)) && _itemDateText.Length < 30)
+                        {
+                            dateStrDic[_itemDateText] = maybeDateStr.Count(f => _itemDateText.Contains(f)) * 2 - Math.Abs(6 - _itemDateText.Length);
+                        }
+                    }
+
+                    if (dateStrDic != null && dateStrDic.Count > 0)
+                        return dateStrDic.OrderByDescending(f => f.Value).FirstOrDefault().Key;
+                }
+            }
             return "";
         }
 
-        public static string GetHtmlContent(string bodyText, string Title, string dateTimeStr)
+        private static string GetHtmlContent(string bodyText, string Title, string dateTimeStr)
         {
             string baseHtmlContent = bodyText;
 
             //首先通过Html的div标签拆解元素打分
             List<Tuple<string, double>> listNodes = SplitHtmlTextByBlockElement(bodyText);
             if (listNodes != null && listNodes.Count > 0)
-                baseHtmlContent = listNodes.OrderByDescending(f => f.Item2).FirstOrDefault().Item1;
-
-            //获取打分最高的元素，去除 H1, 包含 Title 和 dateTimeStr 的行
-            if (Regex.IsMatch(baseHtmlContent, @"<\s*h1(\s|>)", RegexOptions.IgnoreCase))
             {
-                HtmlNode htmlNode = HtmlUtility.getSafeHtmlRootNode(baseHtmlContent, true, true);
-                HtmlNodeCollection Ps = htmlNode.SelectNodes("//h1");
-                if (Ps != null && Ps.Count > 0)
-                    foreach (HtmlNode node in Ps)
-                        try
-                        {
-                            node.RemoveAll();
-                        }
-                        catch (Exception ex)
-                        {
-                        }
-
-                baseHtmlContent = htmlNode.OuterHtml;
+                baseHtmlContent = listNodes.OrderByDescending(f => f.Item2).FirstOrDefault().Item1;
             }
-
-            //baseHtmlContent.Replace(Title, "");
-            //baseHtmlContent.Replace(dateTimeStr, "");
 
             return baseHtmlContent;
         }
 
         /// <summary>
-        /// 从body标签文本中分析正文内容
-        /// </summary>
-        /// <param name="bodyText">只过滤了script和style标签的body文本内容</param>
-        /// <param name="content">返回文本正文，不包含标签</param>
-        /// <param name="contentWithTags">返回文本正文包含标签</param>
-        private static void GetContent(string bodyText, out string content, out string contentWithTags)
-        {
-            string[] orgLines = null;   // 保存原始内容，按行存储
-            string[] lines = null;      // 保存干净的文本内容，不包含标签
-
-            orgLines = bodyText.Split('\n');
-            lines = new string[orgLines.Length];
-            // 去除每行的空白字符,剔除标签
-            for (int i = 0; i < orgLines.Length; i++)
-            {
-                string lineInfo = orgLines[i];
-                // 处理回车，使用[crlf]做为回车标记符，最后统一处理
-                lineInfo = Regex.Replace(lineInfo, "(?is)</p>|<br.*?/>", "[crlf]");
-                lines[i] = Regex.Replace(lineInfo, "(?is)<.*?>", "").Trim();
-            }
-
-            StringBuilder sb = new StringBuilder();
-            StringBuilder orgSb = new StringBuilder();
-
-            int preTextLen = 0;         // 记录上一次统计的字符数量
-            int startPos = -1;          // 记录文章正文的起始位置
-            for (int i = 0; i < lines.Length - _depth; i++)
-            {
-            reCal:
-
-                int len = 0;
-                for (int j = 0; j < _depth; j++)
-                {
-                    int last = len;
-                    len += lines[i + j].Length;
-
-                    if (len == 0) //忽略空行开头的情况
-                        break;
-
-                    //寻找突然变化的点，如果某次的数量大于之前所有的字数*2，则以他为起点
-                    if (j > 0 && last * 2 < lines[i + j].Length)
-                    {
-                        i = i + j;
-                        goto reCal;
-                    }
-                }
-
-                if (startPos == -1)     // 还没有找到文章起始位置，需要判断起始位置
-                {
-                    if (preTextLen > _limitCount && len > 0)    // 如果上次查找的文本数量超过了限定字数，且当前行数字符数不为0，则认为是开始位置
-                    {
-                        // 查找文章起始位置, 如果向上查找，发现2行连续的空行则认为是头部（这里并不一定呀）
-                        int emptyCount = 0;
-                        for (int j = i - 1; j > 0; j--)
-                        {
-                            if (String.IsNullOrEmpty(lines[j]))
-                            {
-                                emptyCount++;
-                            }
-                            else
-                            {
-                                emptyCount = 0;
-                            }
-                            if (emptyCount == _headEmptyLines)
-                            {
-                                startPos = j + _headEmptyLines;
-                                break;
-                            }
-                        }
-                        // 如果没有定位到文章头，则以当前查找位置作为文章头
-                        if (startPos == -1)
-                        {
-                            startPos = i;
-                        }
-                        // 填充发现的文章起始部分
-                        for (int j = startPos; j <= i; j++)
-                        {
-                            sb.Append(lines[j]);
-                            orgSb.Append(orgLines[j]);
-                        }
-                    }
-                }
-                else
-                {
-                    //if (len == 0 && preTextLen == 0)    // 当前长度为0，且上一个长度也为0，则认为已经结束
-                    if (len <= _endLimitCharCount && preTextLen < _endLimitCharCount)    // 当前长度为0，且上一个长度也为0，则认为已经结束
-                    {
-                        if (!_appendMode)
-                        {
-                            break;
-                        }
-                        startPos = -1;
-                    }
-                    sb.Append(lines[i]);
-                    orgSb.Append(orgLines[i]);
-                }
-                preTextLen = len;
-            }
-
-            string result = sb.ToString();
-            // 处理回车符，更好的将文本格式化输出
-            content = result.Replace("[crlf]", Environment.NewLine);
-            content = System.Web.HttpUtility.HtmlDecode(content);
-            // 输出带标签文本
-            contentWithTags = orgSb.ToString();
-        }
-
-        /// <summary>
         /// 通过Html常用的块状元素来拆分数据块，第一阶段先用 div
         /// div 默认会有15分的基础分，子元素出现一次div 扣 3 分
-        /// 内部包含的正文字每20个得一分，出现一个 a 标签扣除一分
+        /// 内部包含的正文字每20个得一分，出现一个 a 标签扣除2分
         /// 正文中连续的3个空行会扣除一分，每多一个多扣0.2分
         /// </summary>
         /// <param name="htmlContent"></param>
@@ -383,7 +241,7 @@ namespace Thrinax.Extract
             if (string.IsNullOrWhiteSpace(htmlContent))
                 return null;
 
-            HtmlNode itempagenode = HtmlUtility.getSafeHtmlRootNode(htmlContent, true, true);
+            HtmlNode itempagenode = HtmlUtility.getSafeHtmlRootNode(htmlContent, true, true).SelectSingleNode("//body");
             var itemNodes = itempagenode.SelectNodes("//div");
 
             if (itemNodes == null || itemNodes.Count == 0)
@@ -394,7 +252,7 @@ namespace Thrinax.Extract
             {
                 double baseScore = 15;
 
-                HtmlNode innerNode = HtmlUtility.getSafeHtmlRootNode(itemNode.OuterHtml, true, true);
+                HtmlNode innerNode = HtmlUtility.getSafeHtmlRootNode(itemNode.OuterHtml, true, true).SelectSingleNode("//body");
 
                 //子元素出现一次div且内容不为空的 扣 3 分
                 var innerDivs = innerNode.SelectNodes("//div");
@@ -407,11 +265,11 @@ namespace Thrinax.Extract
                     }
                 }
 
-                //子元素出现一次a 扣 1 分
+                //子元素出现一次a 扣 2 分
                 var inneras = innerNode.SelectNodes("//a");
                 if (inneras != null && inneras.Count > 0)
                 {
-                    baseScore -= inneras.Count;
+                    baseScore -= inneras.Count * 2;
                 }
 
                 //获取正文部分，计算字数
@@ -420,7 +278,36 @@ namespace Thrinax.Extract
                 {
                     string innerTextWithoutBlack = Regex.Replace(innerText, @"\s", "");
                     if (!string.IsNullOrWhiteSpace(innerTextWithoutBlack) && innerTextWithoutBlack.Length > 0)
+                    {
                         baseScore += (double)innerTextWithoutBlack.Length / 20;
+
+                        //Node中出现超过2个P标签的，同时判断所有 P 元素的字数 与 innerTextWithoutBlack 的字数，差值小于10%时替换，P 元素每增加一个得一分；
+                        if (innerNode.SelectSingleNode("//div").ChildNodes.Count(f => f.Name == "p") > 2)
+                        {
+                            HtmlNode htmlNode = HtmlUtility.getSafeHtmlRootNode("", true, true).SelectSingleNode("//body");
+                            foreach (HtmlNode _tmpNode in innerNode.SelectSingleNode("//div").ChildNodes)
+                            {
+                                if (_tmpNode.Name == "p")
+                                {
+                                    htmlNode.AppendChild(_tmpNode);
+                                }
+                            }
+
+                            string newPNodeText = htmlNode.InnerText;
+                            if (!string.IsNullOrWhiteSpace(newPNodeText))
+                            {
+                                string newPNodeTexttWithoutBlack = Regex.Replace(newPNodeText, @"\s", "");
+
+                                if (!string.IsNullOrWhiteSpace(newPNodeTexttWithoutBlack) && newPNodeTexttWithoutBlack.Length > 0
+                                    && ((double)(innerTextWithoutBlack.Length - newPNodeTexttWithoutBlack.Length) / innerTextWithoutBlack.Length <= 0.1))
+                                {
+                                    innerNode = htmlNode;
+                                    innerText = newPNodeText;
+                                    baseScore = 15 + newPNodeTexttWithoutBlack.Length / 20 + (htmlNode.ChildNodes.Count - 2);
+                                }
+                            }
+                        }
+                    }
                 }
                 else
                     continue;
@@ -442,11 +329,11 @@ namespace Thrinax.Extract
                         currentBlackCount = 0;
                 }
 
-                Tuple<string, double> tuple = new Tuple<string, double>(itemNode.InnerHtml, baseScore);
+                Tuple<string, double> tuple = new Tuple<string, double>(innerNode.InnerHtml, baseScore);
                 itemNodeScores.Add(tuple);
             }
 
-            return itemNodeScores;
+            return itemNodeScores.OrderByDescending(f => f.Item2).ToList();
         }
     }
 }

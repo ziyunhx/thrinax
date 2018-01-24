@@ -1,2 +1,2 @@
 # thrinax
-A lib which is used of Chinese unstructured text capture.
+A lib which is used of Chinese unstructured text capture and analysis.

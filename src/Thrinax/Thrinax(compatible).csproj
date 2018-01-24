@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks Condition="'$(LibraryFrameworks)'==''">netstandard2.0;net45;net40;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LibraryFrameworks)'==''">netstandard2.0;net45;net40;net452</TargetFrameworks>
     <TargetFrameworks Condition="'$(LibraryFrameworks)'!=''">$(LibraryFrameworks)</TargetFrameworks>
     <Description>A csharp crawler lib.</Description>
     <AssemblyTitle>Thrinax</AssemblyTitle>
@@ -42,6 +42,19 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
   </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net40' OR '$(TargetFramework)' == 'net45' OR '$(TargetFramework)' == 'net452'">
+    <Reference Include="System.Web" />
+    <Reference Include="System.Configuration" />    
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net45' OR '$(TargetFramework)' == 'net452'">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net40'">
+    <PackageReference Include="Microsoft.Net.Http" Version="2.2.29" />
+  </ItemGroup> 
 
   <ItemGroup>
     <Compile Remove="Utility\ImageUtility.cs" />

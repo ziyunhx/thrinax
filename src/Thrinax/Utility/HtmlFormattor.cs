@@ -15,22 +15,27 @@ namespace Thrinax.Utility
         /// <summary>
         /// 清洗时去掉的Html标签(其中内容也去掉)
         /// </summary>
-        public static string HtmlRemoveTags_RemoveContent = ConfigurationManager.AppSettings["Palas.Core.HtmlRemoveTags_RemoveContent"] ?? @"script obj object param embed map input";
+        public static string HtmlRemoveTags_RemoveContent = ConfigurationManager.AppSettings["Thrinax.HtmlRemoveTags_RemoveContent"] ?? @"script obj object param embed map input";
 
         /// <summary>
         /// 清洗时去掉的Html标签(其中内容保留)
         /// </summary>
-        public static string HtmlRemoveTags_RemainContent = ConfigurationManager.AppSettings["Palas.Core.HtmlRemoveTags_RemainContent"] ?? @"span font param pre a";
+        public static string HtmlRemoveTags_RemainContent = ConfigurationManager.AppSettings["Thrinax.HtmlRemoveTags_RemainContent"] ?? @"span font param pre a";
 
         /// <summary>
         /// 清洗时去掉的Html标签中的属性
         /// </summary>
-        public static string HtmlRemoveProperty = ConfigurationManager.AppSettings["Palas.Core.HtmlRemoveProperty"] ?? @"style class id";
+        public static string HtmlRemoveProperty = ConfigurationManager.AppSettings["Thrinax.HtmlRemoveProperty"] ?? @"style class id";
 
         /// <summary>
         /// 图片的alt属性文字
         /// </summary>
-        public static string HtmlImgAltText = ConfigurationManager.AppSettings["Palas.Core.HtmlImgAltText"] ?? @"Palas";
+        public static string HtmlImgAltText = ConfigurationManager.AppSettings["Thrinax.HtmlImgAltText"] ?? @"";
+
+        /// <summary>
+        /// 如果内部内容为空zhe
+        /// </summary>
+        public static string HtmlRemoveNullTags = ConfigurationManager.AppSettings["Thrinax.HtmlRemoveNullTags"] ?? @"div span table center iframe";
 
         #endregion 配置项
 
@@ -114,7 +119,9 @@ namespace Thrinax.Utility
             {
                 HtmlNodeCollection Ps = doc.DocumentNode.SelectNodes("//p");
                 if (Ps != null && Ps.Count > 0)
+                {
                     foreach (HtmlNode node in Ps)
+                    {
                         try
                         {
                             //清理无内容的P
@@ -129,19 +136,44 @@ namespace Thrinax.Utility
 
                                 while (node.InnerHtml.TrimStart().StartsWith(" ", StringComparison.OrdinalIgnoreCase))
                                     node.InnerHtml = node.InnerHtml.TrimStart(' ');
-
-                                ////必须是文字开头的
-                                //if (string.Compare(node.FirstChild.Name, "#text", true) == 0)
-                                //    node.InnerHtml = "&nbsp;&nbsp;&nbsp;&nbsp;" + node.InnerHtml;
                             }
                         }
                         catch (Exception ex)
                         {
                             Logger.Warn(string.Format("调整内容中p标签时出错:{0},Url={1},P={2}", ex.Message, Url, node.OuterHtml));
                         }
+                    }
+                }
             }
 
             #endregion P整理
+
+            //清理空内容的标签
+            foreach (string RemoveNullTag in HtmlRemoveNullTags.Split())
+            {
+                HtmlNodeCollection NullTags = doc.DocumentNode.SelectNodes("//" + RemoveNullTag);
+                if (NullTags != null && NullTags.Count > 0)
+                {
+                    foreach (HtmlNode node in NullTags)
+                    {
+                        try
+                        {
+                            //清理无内容的P
+                            if (string.IsNullOrWhiteSpace(TextCleaner.FullClean(node.InnerHtml, false)))
+                            {
+                                doc.DocumentNode.RemoveChild(node);
+                                //node.ParentNode.Remove();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Warn(string.Format("调整内容中标签时出错:{0},Url={1},P={2}", ex.Message, Url, node.OuterHtml));
+                        }
+                    }
+                }
+            }
+
+            OriHtml = doc.DocumentNode.InnerHtml;
 
             #region Img整理
 

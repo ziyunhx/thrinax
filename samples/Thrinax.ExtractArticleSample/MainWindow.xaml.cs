@@ -33,7 +33,7 @@ namespace Thrinax.ExtractArticleSample
                     txt_pubdate.Text = article.PubDate.ToString();
 
                     if (!string.IsNullOrWhiteSpace(article.HtmlContent))
-                        txt_content.Text = HtmlFormattor.FormatHtml(article.HtmlContent, currentUrl).Replace("<div></div>", "");
+                        txt_content.Text = HtmlFormattor.FormatHtml(article.HtmlContent, currentUrl);
                 }
                 else
                 {

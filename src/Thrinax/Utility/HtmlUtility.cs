@@ -299,8 +299,8 @@ namespace Thrinax.Utility
         /// <returns></returns>
         public static string ExpandRelativePath(string baseUrl, string relativePath)
         {
-            relativePath = System.Web.HttpUtility.HtmlDecode(relativePath);
-            baseUrl = System.Web.HttpUtility.HtmlDecode(baseUrl);
+            relativePath = HttpUtility.HtmlDecode(relativePath);
+            baseUrl = HttpUtility.HtmlDecode(baseUrl);
             if (string.IsNullOrWhiteSpace(relativePath)) return baseUrl;
             if (relativePath.StartsWith("http://")) return relativePath;
             return new Uri(new Uri(baseUrl), relativePath).ToString();

@@ -235,6 +235,7 @@ namespace Thrinax.Utility
             HTML = trimRegex.Replace(HTML, " ");
             HTML = wRegex.Replace(HTML,  " ");
             HTML = sRegex.Replace(HTML, " ");
+            HTML = zRegex.Replace(HTML, ">");
 
             return HTML.Trim();
         }
@@ -242,6 +243,7 @@ namespace Thrinax.Utility
         private static Regex trimRegex = new Regex(@"\t|\r|&nbsp;|&nbsp", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static Regex wRegex = new Regex(@"&\w+;", RegexOptions.Compiled);
         private static Regex sRegex = new Regex(@"\s+", RegexOptions.Compiled);
+        private static Regex zRegex = new Regex(@"\s+>", RegexOptions.Compiled);
         private static Regex nbspRegex = new Regex(@"&nbsp;", RegexOptions.Compiled);
         private static Regex gtRegex = new Regex(@"&gt;", RegexOptions.Compiled);
         private static Regex ltRegex = new Regex(@"&lt;", RegexOptions.Compiled);
