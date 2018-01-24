@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{A2DA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thrinax.ExtractArticleSample", "..\samples\Thrinax.ExtractArticleSample\Thrinax.ExtractArticleSample.csproj", "{DE0C0407-8388-4DDB-ABA1-4CAB5A45B493}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thrinax(compatible)", "Thrinax\Thrinax(compatible).csproj", "{179B1B6B-9DAE-4C57-84F6-2CDFFBB65115}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{1980B082-421F-4C7A-9145-FCD8B4CDC558}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1980B082-421F-4C7A-9145-FCD8B4CDC558}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1980B082-421F-4C7A-9145-FCD8B4CDC558}.Release|Any CPU.Build.0 = Release|Any CPU
+		{179B1B6B-9DAE-4C57-84F6-2CDFFBB65115}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{179B1B6B-9DAE-4C57-84F6-2CDFFBB65115}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{179B1B6B-9DAE-4C57-84F6-2CDFFBB65115}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{179B1B6B-9DAE-4C57-84F6-2CDFFBB65115}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net452</TargetFrameworks>
     <Description>A csharp crawler lib.</Description>
     <AssemblyTitle>Thrinax</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
@@ -23,26 +23,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Http\" />
-    <Folder Include="Decrypt\" />
-    <Folder Include="Extract\" />
-    <Folder Include="Chardet\" />
-    <Folder Include="Interface\" />
-    <Folder Include="Configs\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AngleSharp" Version="0.9.9.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="HtmlAgilityPack" Version="1.6.15" />
-	<PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="Utility\ImageUtility.cs" />
-    <Compile Remove="Parser\FalcoAParser.cs" />
-    <Compile Remove="Parser\AIParser.cs" />
-    <Compile Remove="Parser\XMLParser.cs" />
+ <ItemGroup>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 </Project>
