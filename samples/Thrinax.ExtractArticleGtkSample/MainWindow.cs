@@ -27,7 +27,7 @@ public partial class MainWindow : Gtk.Window
             currentUrl = txtUrl.Text;
             string htmlContent = HttpHelper.GetHttpContent(currentUrl);
 
-            Article article = Html2Article.GetArticle(htmlContent);
+            Article article = HtmlToArticle.GetArticle(htmlContent);
 
             if (article != null && !string.IsNullOrWhiteSpace(article.Title))
             {

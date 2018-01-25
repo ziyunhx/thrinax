@@ -81,7 +81,7 @@ namespace Thrinax.Parser
                     }
 
                     //直接用基于行文字密度的简单算法提取
-                    Article article = Html2Article.GetArticle(ItemHTML);
+                    Article article = HtmlToArticle.GetArticle(ItemHTML);
                     if (article == null || string.IsNullOrWhiteSpace(article.HtmlContent))
                     {
                         Item.HtmlContent = "ItemPage Parse Error";

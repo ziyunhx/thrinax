@@ -29,7 +29,7 @@ namespace Thrinax.Extract
     /// <summary>
     /// 解析Html页面的文章正文内容,基于文本密度的HTML正文提取类   
     /// </summary>
-    public class Html2Article
+    public class HtmlToArticle
     {
         #region 参数设置
 
@@ -40,7 +40,8 @@ namespace Thrinax.Extract
             new[] { @"(?is)<style.*?>.*?</style>", "" },
             new[] { @"(?is)<!--.*?-->", "" },    // 过滤Html代码中的注释
             // 针对链接密集型的网站的处理，主要是门户类的网站，降低链接干扰
-            new[] { @"(?is)</a>", "</a>\n"}
+            new[] { @"(?is)</a>", "</a>\n"},
+            new[] { @"<h-char unicode=.*?""><h-inner>([\\s\\S]*?)?</h-inner></h-char>", "$1"}
         };
         #endregion
 
@@ -55,43 +56,24 @@ namespace Thrinax.Extract
             // 常见的段内标签去除
             if (html.Contains("<h-char unicode="))
             {
-                html = Regex.Replace(html, "<h-char unicode=.*?\"><h-inner>([\\s\\S]*?)?</h-inner></h-char>", "$1");
+                html = Regex.Replace(html, "", "$1");
             }
-
-            // 对区块元素进行分行处理
-            html = html.Replace("<h1", "\n\n\n\n\n<h1");
-            html = html.Replace("h1>", "h1>\n\n\n\n\n");
-            html = html.Replace("div>", "div>\n");
 
             // 获取html，body标签内容
-            string body = "";
-            string bodyFilter = @"(?is)<body.*?</body>";
-            Match m = Regex.Match(html, bodyFilter);
-            if (m.Success)
-            {
-                body = m.ToString();
-            }
+            string backupHtml = html;
             // 过滤样式，脚本等不相干标签
             foreach (var filter in Filters)
             {
-                body = Regex.Replace(body, filter[0], filter[1]);
+                backupHtml = Regex.Replace(backupHtml, filter[0], filter[1]);
             }
-            // 标签规整化处理，将标签属性格式化处理到同一行
-            // 处理形如以下的标签：
-            //  <a 
-            //   href='http://www.baidu.com'
-            //   class='test'
-            // 处理后为
-            //  <a href='http://www.baidu.com' class='test'>
-            body = Regex.Replace(body, @"(<[^<>]+)\s*\n\s*", FormatTag);
 
             Article article = new Article();
 
             article.Title = Regex.Replace(GetTitle(html), @"\s", "");
-            string dateTimeStr = GetPublishDate(body);
+            string dateTimeStr = GetPublishDate(backupHtml);
 
             article.PubDate = DateTimeParser.Parser(dateTimeStr);
-            article.HtmlContent = GetHtmlContent(body, article.Title, dateTimeStr);
+            article.HtmlContent = GetHtmlContent(backupHtml, article.Title, dateTimeStr);
 
             if (!string.IsNullOrWhiteSpace(article.HtmlContent))
                 article.Content = HTMLCleaner.CleanHTML(article.HtmlContent, false);
@@ -99,29 +81,8 @@ namespace Thrinax.Extract
             return article;
         }
 
-
-
         /// <summary>
-        /// 格式化标签，剔除匹配标签中的回车符
-        /// </summary>
-        /// <param name="match"></param>
-        /// <returns></returns>
-        private static string FormatTag(Match match)
-        {
-            StringBuilder sb = new StringBuilder();
-            foreach (var ch in match.Value)
-            {
-                if (ch == '\r' || ch == '\n')
-                {
-                    continue;
-                }
-                sb.Append(ch);
-            }
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// 获取时间
+        /// 获取标题
         /// </summary>
         /// <param name="html"></param>
         /// <returns></returns>
@@ -214,6 +175,13 @@ namespace Thrinax.Extract
             return "";
         }
 
+        /// <summary>
+        /// Gets the content of the html.
+        /// </summary>
+        /// <returns>The html content.</returns>
+        /// <param name="bodyText">Body text.</param>
+        /// <param name="Title">Title.</param>
+        /// <param name="dateTimeStr">Date time string.</param>
         private static string GetHtmlContent(string bodyText, string Title, string dateTimeStr)
         {
             string baseHtmlContent = bodyText;

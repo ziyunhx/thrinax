@@ -25,7 +25,7 @@ namespace Thrinax.ExtractArticleSample
                 currentUrl = txt_url.Text;
                 string htmlContent = HttpHelper.GetHttpContent(currentUrl);
 
-                Article article = Html2Article.GetArticle(htmlContent);
+                Article article = HtmlToArticle.GetArticle(htmlContent);
 
                 if (article != null && !string.IsNullOrWhiteSpace(article.Title))
                 {
