@@ -17,10 +17,10 @@
     <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <SignAssembly>False</SignAssembly>
     <RepositoryUrl>https://github.com/ziyunhx/thrinax</RepositoryUrl>
-    <FileVersion>1.0.2.1451</FileVersion>
+    <FileVersion>1.0.3.0127</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
