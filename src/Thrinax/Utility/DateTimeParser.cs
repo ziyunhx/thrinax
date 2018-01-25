@@ -9,7 +9,7 @@ namespace Thrinax.Utility
     public class DateTimeParser
     {
         /// <summary>
-        /// 尝试解析日期+时间字符串，失败则返回null
+        /// 尝试解析日期+时间字符串，失败则返回最小时间
         /// </summary>
         /// <param name="DateTimeString"></param>
         /// <returns></returns>
@@ -377,28 +377,5 @@ namespace Thrinax.Utility
 
             return 0.0;
         }
-
-        #region 解析事件发生时间
-        private static Regex occurRegex1 = new Regex(@"(?<=截至)[昨天上午下晚间日后]{0,4}\d{2}:\d{2}", RegexOptions.Compiled);
-        private static Regex occurRegex2 = new Regex(@"(早盘|中午收盘)|((?<!中午)收盘|盘尾|尾盘)", RegexOptions.Compiled);
-        private static Regex occurRegex3 = new Regex(@"(午后)|(收盘|盘尾|尾盘)", RegexOptions.Compiled);
-        private static Regex occurRegex4 = new Regex(@"(?<=截至)[昨天上午下晚间日后]{2,4}", RegexOptions.Compiled);
-
-        public static DateTime? ParserEventOccurTime(string cleanText)
-        {
-            List<string> hits = new List<string>();
-
-            //匹配第一种情况并解析
-            MatchCollection occurMatch1 = occurRegex1.Matches(cleanText);
-            if (occurMatch1 != null && occurMatch1.Count > 0)
-            {
-
-            }
-
-
-            return null;
-        }
-
-        #endregion
     }
 }

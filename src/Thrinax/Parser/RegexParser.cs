@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Thrinax.Interface;
 using Thrinax.Models;
 using Thrinax.Utility;
@@ -34,9 +32,11 @@ namespace Thrinax.Parser
             #region Item集合
 
             List<Article> Items = null;
-
+#if !NET40
             MatchCollection Matches = Regex.Matches(Html, Pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline, new TimeSpan(0, 0, 10));
-
+#else
+            MatchCollection Matches = RegexUtility.Matches(Html, Pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline, 10);
+#endif
             if (Matches == null)
             {
                 Logger.Warn(string.Format("正则ParseList失败,Url={0}", Url));
@@ -47,7 +47,11 @@ namespace Thrinax.Parser
             {
                 MatchesCount = Matches.Count;
             }
+#if !NET40
             catch (RegexMatchTimeoutException e)
+#else
+            catch (Exception e)
+#endif
             {
                 Logger.Error(string.Format("正则ParseList超时,Url={0}", Url), e);
                 Matches = null;
@@ -74,7 +78,7 @@ namespace Thrinax.Parser
             articleList.Articles = Items;
             articleList.Count = Items.Count;
             articleList.CurrentPage = 1;
-            #endregion Item集合
+#endregion Item集合
 
             return articleList;
         }
@@ -88,7 +92,11 @@ namespace Thrinax.Parser
         /// <param name="BaseArticle">Base article.</param>
         public bool ParseItem(string Html, string Pattern, string Url, ref Article BaseArticle)
         {
+#if !NET40
             Match m = Regex.Match(Html, Pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline, new TimeSpan(0, 0, 10));
+#else
+            Match m = RegexUtility.Match(Html, Pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline, 10);
+#endif
             Match2Item(m, ref BaseArticle, Url, true);
             return true;
         }
