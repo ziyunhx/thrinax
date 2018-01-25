@@ -87,7 +87,7 @@ namespace Thrinax.Extract
 
             Article article = new Article();
 
-            article.Title = Regex.Replace(GetTitle(html), @"\s", "");
+            article.Title = GetTitle(html);
             string dateTimeStr = GetPublishDate(body);
 
             article.PubDate = DateTimeParser.Parser(dateTimeStr);
@@ -127,25 +127,27 @@ namespace Thrinax.Extract
         /// <returns></returns>
         private static string GetTitle(string html)
         {
-            string titleFilter = @"<title>[\s\S]*?</title>";
-            string h1Filter = @"<h1.*?>.*?</h1>";
-            string clearFilter = @"<.*?>";
+            HtmlNode itempagenode = HtmlUtility.getSafeHtmlRootNode(html, true, true);
 
             string title = "";
-            Match match = Regex.Match(html, titleFilter, RegexOptions.IgnoreCase);
-            if (match.Success)
+            HtmlNode titleHtmlNode = itempagenode.SelectSingleNode("//title");
+            if (titleHtmlNode != null)
             {
-                title = Regex.Replace(match.Groups[0].Value, clearFilter, "");
+                string perTitle = titleHtmlNode.InnerText;
+                if (!string.IsNullOrWhiteSpace(perTitle))
+                    title = Regex.Replace(perTitle, @"\s", "");
             }
 
             // 正文的标题一般在h1中，比title中的标题更干净
-            match = Regex.Match(html, h1Filter, RegexOptions.IgnoreCase);
-            if (match.Success)
+            HtmlNode h1HtmlNode = itempagenode.SelectSingleNode("//h1");
+            if (h1HtmlNode != null)
             {
-                string h1 = Regex.Replace(match.Groups[0].Value, clearFilter, "");
-                if (!String.IsNullOrEmpty(h1) && title.Contains(h1))
+                string perTitle = h1HtmlNode.InnerText;
+                if (!string.IsNullOrWhiteSpace(perTitle))
                 {
-                    title = h1;
+                    perTitle = Regex.Replace(perTitle, @"\s", "");
+                    if (title.Contains(perTitle))
+                        title = perTitle;
                 }
             }
             return title;
@@ -281,14 +283,20 @@ namespace Thrinax.Extract
                     {
                         baseScore += (double)innerTextWithoutBlack.Length / 20;
 
-                        //Node中出现超过2个P标签的，同时判断所有 P 元素的字数 与 innerTextWithoutBlack 的字数，差值小于10%时替换，P 元素每增加一个得一分；
-                        if (innerNode.SelectSingleNode("//div").ChildNodes.Count(f => f.Name == "p") > 2)
+                        //Node中出现超过1个P标签的，同时判断所有 P 元素的字数 与 innerTextWithoutBlack 的字数，差值小于10%时替换，P 元素每增加一个得一分；
+                        if (innerNode.SelectSingleNode("//div").ChildNodes.Count(f => f.Name == "p") > 1)
                         {
+                            //针对P元素内有a标签的进行得分惩罚，存在则扣2分
+                            int aScore = 0;
                             HtmlNode htmlNode = HtmlUtility.getSafeHtmlRootNode("", true, true).SelectSingleNode("//body");
                             foreach (HtmlNode _tmpNode in innerNode.SelectSingleNode("//div").ChildNodes)
                             {
                                 if (_tmpNode.Name == "p")
                                 {
+                                    var aNodes = _tmpNode.SelectNodes("//a");
+                                    if (aNodes != null && aNodes.Count > 0)
+                                        aScore += 2;
+
                                     htmlNode.AppendChild(_tmpNode);
                                 }
                             }
@@ -296,14 +304,32 @@ namespace Thrinax.Extract
                             string newPNodeText = htmlNode.InnerText;
                             if (!string.IsNullOrWhiteSpace(newPNodeText))
                             {
-                                string newPNodeTexttWithoutBlack = Regex.Replace(newPNodeText, @"\s", "");
+                                string newPNodeTextWithoutBlack = Regex.Replace(newPNodeText, @"\s", "");
 
-                                if (!string.IsNullOrWhiteSpace(newPNodeTexttWithoutBlack) && newPNodeTexttWithoutBlack.Length > 0
-                                    && ((double)(innerTextWithoutBlack.Length - newPNodeTexttWithoutBlack.Length) / innerTextWithoutBlack.Length <= 0.1))
+                                if (!string.IsNullOrWhiteSpace(newPNodeTextWithoutBlack) && newPNodeTextWithoutBlack.Length > 0
+                                    && ((double)(innerTextWithoutBlack.Length - newPNodeTextWithoutBlack.Length) / innerTextWithoutBlack.Length <= 0.1))
                                 {
                                     innerNode = htmlNode;
                                     innerText = newPNodeText;
-                                    baseScore = 15 + newPNodeTexttWithoutBlack.Length / 20 + (htmlNode.ChildNodes.Count - 2);
+                                    baseScore = 15 + newPNodeTextWithoutBlack.Length / 20 + (htmlNode.ChildNodes.Count - 1) - aScore;
+
+                                    //a标签内的文字与总文字相差小于95%时扣100分
+                                    var allANodes = htmlNode.SelectNodes("//a");
+                                    if (allANodes != null && allANodes.Count > 0)
+                                    {
+                                        string _allAContent = "";
+                                        foreach (var _aNode in allANodes)
+                                        {
+                                            _allAContent += _aNode.InnerText;
+                                        }
+                                        string _allAContentWithoutBlack = Regex.Replace(_allAContent, @"\s", "");
+
+                                        if ((double)(newPNodeTextWithoutBlack.Length -_allAContentWithoutBlack.Length) / newPNodeTextWithoutBlack.Length <= 0.05)
+                                        {
+                                            baseScore -= 100;
+                                        }
+                                    }
+
                                 }
                             }
                         }

@@ -16,9 +16,8 @@ namespace Thrinax.Utility
         /// <param name="input">Input.</param>
         /// <param name="pattern">Pattern.</param>
         /// <param name="options">Options.</param>
-        /// <param name="CrawlID">Crawl identifier.</param>
         /// <param name="timeoutSecs">Timeout secs.</param>
-        public static MatchCollection Matches(string input, string pattern, RegexOptions options, string CrawlID, int timeoutSecs = 200)
+        public static MatchCollection Matches(string input, string pattern, RegexOptions options, int timeoutSecs = 200)
         {
             MatchCollection matchResult = null;
 
@@ -26,7 +25,7 @@ namespace Thrinax.Utility
                 {
                     try
                     {
-                        matchResult = Regex.Matches(input, pattern, options, new TimeSpan(0, 0, timeoutSecs));
+                        matchResult = Regex.Matches(input, pattern, options);
                     }
                     catch (Exception ex)
                     {
@@ -39,9 +38,9 @@ namespace Thrinax.Utility
             {
                 thread.Start();
             }
-            catch (RegexMatchTimeoutException e)
+            catch(Exception ex)
             {
-                Logger.Warn("正则解析时间超长Collection CrawlID:" + CrawlID, e);
+                Logger.Error("正则匹配时间超限！", ex);
                 return null;
             }
             bool timeout = !thread.Join(new TimeSpan(0, 0, timeoutSecs));
@@ -64,19 +63,44 @@ namespace Thrinax.Utility
         /// <param name="input">Input.</param>
         /// <param name="pattern">Pattern.</param>
         /// <param name="options">Options.</param>
-        /// <param name="CrawlID">Crawl identifier.</param>
         /// <param name="timeoutSecs">Timeout secs.</param>
-        public static Match Match(string input, string pattern, RegexOptions options, string CrawlID, int timeoutSecs = 10)
+        public static Match Match(string input, string pattern, RegexOptions options, int timeoutSecs = 10)
         {
+            Match matchResult = null;
+
+            Thread thread = new Thread(() =>
+            {
+                try
+                {
+                    matchResult = Regex.Match(input, pattern, options);
+                }
+                catch (Exception ex)
+                {
+                    matchResult = null;
+                    Logger.Error("Regex match error.", ex);
+                }
+            });
+            thread.Name = Thread.CurrentThread.Name + " DoCrawl";
             try
             {
-                return Regex.Match(input, pattern, options, new TimeSpan(0, 0, timeoutSecs));
+                thread.Start();
             }
-            catch (RegexMatchTimeoutException e)
+            catch (Exception ex)
             {
-                Logger.Warn("正则解析时间超长Single match CrawlID:" + CrawlID, e);
+                Logger.Error("正则匹配时间超限！", ex);
                 return null;
             }
+            bool timeout = !thread.Join(new TimeSpan(0, 0, timeoutSecs));
+
+            if (timeout)
+            {
+                #region 任务超时
+                thread.Abort();
+                matchResult = null;
+                #endregion
+            }
+
+            return matchResult;
         }
 
         /// <summary>
