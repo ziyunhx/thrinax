@@ -30,7 +30,7 @@ namespace Thrinax.Utility
         /// <summary>
         /// 图片的alt属性文字
         /// </summary>
-        public static string HtmlImgAltText = ConfigurationManager.AppSettings["Thrinax.HtmlImgAltText"] ?? @"";
+        public static string HtmlImgAltText = ConfigurationManager.AppSettings["Thrinax.HtmlImgAltText"] ?? @"Thrinax";
 
         /// <summary>
         /// 如果内部内容为空zhe

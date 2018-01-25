@@ -23,6 +23,7 @@ using System.Text.RegularExpressions;
 using Thrinax.Models;
 using Thrinax.Utility;
 using System.Linq;
+using System.Configuration;
 
 namespace Thrinax.Extract
 {
@@ -43,6 +44,13 @@ namespace Thrinax.Extract
             new[] { @"(?is)</a>", "</a>\n"}
         };
         #endregion
+
+        /// <summary>
+        /// 正文中很难出现的词语，打分时每次出现会扣除五分；所个词语用 ‘,’ 隔开
+        /// </summary>
+        private static string ContentIgnoreText = ConfigurationManager.AppSettings["Thrinax.ContentIgnoreText"] ??
+            @"版权均属于,Copyright,网站地图,商务合作,书面授权,不得转载,转载自其它媒体,声明：,仅供投资者参考,不构成投资建议,关于我们,ICP备,公网安备,网上传播视听节目许可证,ICP证";
+
 
         /// <summary>
         /// 从给定的Html原始文本中获取正文信息
@@ -284,7 +292,7 @@ namespace Thrinax.Extract
                         baseScore += (double)innerTextWithoutBlack.Length / 20;
 
                         //Node中出现超过1个P标签的，同时判断所有 P 元素的字数 与 innerTextWithoutBlack 的字数，差值小于10%时替换，P 元素每增加一个得一分；
-                        if (innerNode.SelectSingleNode("//div").ChildNodes.Count(f => f.Name == "p") > 1)
+                        if (innerNode.SelectSingleNode("//div").ChildNodes.Count(f => f.Name == "p") > 0)
                         {
                             //针对P元素内有a标签的进行得分惩罚，存在则扣2分
                             int aScore = 0;
@@ -334,6 +342,12 @@ namespace Thrinax.Extract
                             }
                         }
                     }
+
+                    //对于正文字数少于15个的，每少一个扣2分
+                    if (innerTextWithoutBlack.Length < 15)
+                    {
+                        baseScore -= (15 - innerTextWithoutBlack.Length) * 2;
+                    }
                 }
                 else
                     continue;
@@ -353,6 +367,17 @@ namespace Thrinax.Extract
                     }
                     else
                         currentBlackCount = 0;
+                }
+
+                //针对正文中不常出现的词进行得分降权，每出现一个扣五分
+                if (!string.IsNullOrWhiteSpace(ContentIgnoreText))
+                {
+                    string[] _ignoreTexts = ContentIgnoreText.Split(',');
+                    foreach (string _ignoreText in _ignoreTexts)
+                    {
+                        if(!string.IsNullOrWhiteSpace(_ignoreText) && innerText.Contains(_ignoreText))
+                            baseScore -= 5;
+                    }
                 }
 
                 Tuple<string, double> tuple = new Tuple<string, double>(innerNode.InnerHtml, baseScore);
