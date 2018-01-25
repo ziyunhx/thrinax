@@ -30,7 +30,7 @@ namespace Thrinax.Extract
     /// <summary>
     /// 解析Html页面的文章正文内容,基于文本密度的HTML正文提取类   
     /// </summary>
-    public class HtmlToArticle
+    public class HtmlTArticle
     {
         #region 参数设置
 
