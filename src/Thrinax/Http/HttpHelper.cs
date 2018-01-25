@@ -239,7 +239,7 @@ namespace Thrinax.Http
             request.Method = "GET";
 
             request.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
-            request.Headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4");
+            request.Headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.9,en;q=0.8,zh-TW;q=0.7");
 
             if (headers != null && headers.Count > 0)
             {
@@ -249,8 +249,15 @@ namespace Thrinax.Http
                 }
             }
 
-            request.ContentType = string.IsNullOrEmpty(contentType) ? "application/x-www-form-urlencoded" : contentType;
-            request.UserAgent = string.IsNullOrEmpty(userAgent) ? "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36" : userAgent;
+            if (string.IsNullOrEmpty(contentType))
+            {
+                request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
+            }
+            else
+            {
+                request.ContentType = contentType;
+            }
+            request.UserAgent = string.IsNullOrEmpty(userAgent) ? "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36" : userAgent;
 
             request.Timeout = timeout;
             request.KeepAlive = true;
@@ -293,7 +300,7 @@ namespace Thrinax.Http
             request.Method = "POST";
 
             request.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
-            request.Headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4");
+            request.Headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.9,en;q=0.8,zh-TW;q=0.7");
 
             if (headers != null && headers.Count > 0)
             {
@@ -303,8 +310,15 @@ namespace Thrinax.Http
                 }
             }
 
-            request.ContentType = string.IsNullOrEmpty(contentType) ? "application/x-www-form-urlencoded" : contentType;
-            request.UserAgent = string.IsNullOrEmpty(userAgent) ? "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36" : userAgent;
+            if (string.IsNullOrEmpty(contentType))
+            {
+                request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
+            }
+            else
+            {
+                request.ContentType = contentType;
+            }
+            request.UserAgent = string.IsNullOrEmpty(userAgent) ? "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36" : userAgent;
 
             request.Timeout = timeout;
             request.KeepAlive = true;
