@@ -221,128 +221,138 @@ namespace Thrinax.Extract
             List<Tuple<string, double>> itemNodeScores = new List<Tuple<string, double>>();
             foreach (var itemNode in itemNodes)
             {
-                double baseScore = 15;
-
-                HtmlNode innerNode = HtmlUtility.getSafeHtmlRootNode(itemNode.OuterHtml, true, true).SelectSingleNode("//body");
-
-                //子元素出现一次div且内容不为空的 扣 3 分
-                var innerDivs = innerNode.SelectNodes("//div");
-                if (innerDivs != null && innerDivs.Count > 1)
+                try
                 {
-                    foreach (var innerDiv in innerDivs)
+                    if (itemNode == null || string.IsNullOrWhiteSpace(itemNode.InnerHtml))
+                        continue;
+
+                    double baseScore = 15;
+
+                    HtmlNode innerNode = HtmlUtility.getSafeHtmlRootNode(itemNode.OuterHtml, true, true).SelectSingleNode("//body");
+
+                    //子元素出现一次div且内容不为空的 扣 3 分
+                    var innerDivs = innerNode.SelectNodes("//div");
+                    if (innerDivs != null && innerDivs.Count > 1)
                     {
-                        if(!string.IsNullOrWhiteSpace(innerDiv.InnerText))
-                            baseScore -= 3;
-                    }
-                }
-
-                //子元素出现一次a 扣 2 分
-                var inneras = innerNode.SelectNodes("//a");
-                if (inneras != null && inneras.Count > 0)
-                {
-                    baseScore -= inneras.Count * 2;
-                }
-
-                //获取正文部分，计算字数
-                string innerText = itemNode.InnerText;
-                if (!string.IsNullOrWhiteSpace(innerText))
-                {
-                    string innerTextWithoutBlack = Regex.Replace(innerText, @"\s", "");
-                    if (!string.IsNullOrWhiteSpace(innerTextWithoutBlack) && innerTextWithoutBlack.Length > 0)
-                    {
-                        baseScore += (double)innerTextWithoutBlack.Length / 20;
-
-                        //Node中出现超过1个P标签的，同时判断所有 P 元素的字数 与 innerTextWithoutBlack 的字数，差值小于10%时替换，P 元素每增加一个得一分；
-                        if (innerNode.SelectSingleNode("//div").ChildNodes.Count(f => f.Name == "p") > 0)
+                        foreach (var innerDiv in innerDivs)
                         {
-                            //针对P元素内有a标签的进行得分惩罚，存在则扣2分
-                            int aScore = 0;
-                            HtmlNode htmlNode = HtmlUtility.getSafeHtmlRootNode("", true, true).SelectSingleNode("//body");
-                            foreach (HtmlNode _tmpNode in innerNode.SelectSingleNode("//div").ChildNodes)
-                            {
-                                if (_tmpNode.Name == "p")
-                                {
-                                    var aNodes = _tmpNode.SelectNodes("//a");
-                                    if (aNodes != null && aNodes.Count > 0)
-                                        aScore += 2;
-
-                                    htmlNode.AppendChild(_tmpNode);
-                                }
-                            }
-
-                            string newPNodeText = htmlNode.InnerText;
-                            if (!string.IsNullOrWhiteSpace(newPNodeText))
-                            {
-                                string newPNodeTextWithoutBlack = Regex.Replace(newPNodeText, @"\s", "");
-
-                                if (!string.IsNullOrWhiteSpace(newPNodeTextWithoutBlack) && newPNodeTextWithoutBlack.Length > 0
-                                    && ((double)(innerTextWithoutBlack.Length - newPNodeTextWithoutBlack.Length) / innerTextWithoutBlack.Length <= 0.1))
-                                {
-                                    innerNode = htmlNode;
-                                    innerText = newPNodeText;
-                                    baseScore = 15 + newPNodeTextWithoutBlack.Length / 20 + (htmlNode.ChildNodes.Count - 1) - aScore;
-
-                                    //a标签内的文字与总文字相差小于95%时扣100分
-                                    var allANodes = htmlNode.SelectNodes("//a");
-                                    if (allANodes != null && allANodes.Count > 0)
-                                    {
-                                        string _allAContent = "";
-                                        foreach (var _aNode in allANodes)
-                                        {
-                                            _allAContent += _aNode.InnerText;
-                                        }
-                                        string _allAContentWithoutBlack = Regex.Replace(_allAContent, @"\s", "");
-
-                                        if ((double)(newPNodeTextWithoutBlack.Length -_allAContentWithoutBlack.Length) / newPNodeTextWithoutBlack.Length <= 0.05)
-                                        {
-                                            baseScore -= 100;
-                                        }
-                                    }
-
-                                }
-                            }
+                            if (innerDiv != null && !string.IsNullOrWhiteSpace(innerDiv.InnerText))
+                                baseScore -= 3;
                         }
                     }
 
-                    //对于正文字数少于15个的，每少一个扣2分
-                    if (innerTextWithoutBlack.Length < 15)
+                    //子元素出现一次a 扣 2 分
+                    var inneras = innerNode.SelectNodes("//a");
+                    if (inneras != null && inneras.Count > 0)
                     {
-                        baseScore -= (15 - innerTextWithoutBlack.Length) * 2;
+                        baseScore -= inneras.Count * 2;
                     }
-                }
-                else
-                    continue;
 
-                //计算正文中的空行，连续的3个空行会扣除一分，每多一个多扣0.2分
-                string[] orgLines = innerText.Split('\n');
-                int currentBlackCount = 0;
-                foreach (string orgLine in orgLines)
-                {
-                    if (string.IsNullOrWhiteSpace(orgLine))
+                    //获取正文部分，计算字数
+                    string innerText = itemNode.InnerText;
+                    if (!string.IsNullOrWhiteSpace(innerText))
                     {
-                        currentBlackCount++;
-                        if (currentBlackCount == 3)
-                            baseScore--;
-                        else if (currentBlackCount > 3)
-                            baseScore -= 0.2;
+                        string innerTextWithoutBlack = Regex.Replace(innerText, @"\s", "");
+                        if (!string.IsNullOrWhiteSpace(innerTextWithoutBlack) && innerTextWithoutBlack.Length > 0)
+                        {
+                            baseScore += (double)innerTextWithoutBlack.Length / 20;
+
+                            //Node中出现超过1个P标签的，同时判断所有 P 元素的字数 与 innerTextWithoutBlack 的字数，差值小于10%时替换，P 元素每增加一个得一分；
+                            if (innerNode.SelectSingleNode("//div").ChildNodes.Count(f => f.Name == "p") > 0)
+                            {
+                                //针对P元素内有a标签的进行得分惩罚，存在则扣2分
+                                int aScore = 0;
+                                HtmlNode htmlNode = HtmlUtility.getSafeHtmlRootNode("", true, true).SelectSingleNode("//body");
+                                foreach (HtmlNode _tmpNode in innerNode.SelectSingleNode("//div").ChildNodes)
+                                {
+                                    if (_tmpNode.Name == "p")
+                                    {
+                                        var aNodes = _tmpNode.SelectNodes("//a");
+                                        if (aNodes != null && aNodes.Count > 0)
+                                            aScore += 2;
+
+                                        htmlNode.AppendChild(_tmpNode);
+                                    }
+                                }
+
+                                string newPNodeText = htmlNode.InnerText;
+                                if (!string.IsNullOrWhiteSpace(newPNodeText))
+                                {
+                                    string newPNodeTextWithoutBlack = Regex.Replace(newPNodeText, @"\s", "");
+
+                                    if (!string.IsNullOrWhiteSpace(newPNodeTextWithoutBlack) && newPNodeTextWithoutBlack.Length > 0
+                                        && ((double)(innerTextWithoutBlack.Length - newPNodeTextWithoutBlack.Length) / innerTextWithoutBlack.Length <= 0.1))
+                                    {
+                                        innerNode = htmlNode;
+                                        innerText = newPNodeText;
+                                        baseScore = 15 + newPNodeTextWithoutBlack.Length / 20 + (htmlNode.ChildNodes.Count - 1) - aScore;
+
+                                        //a标签内的文字与总文字相差小于95%时扣100分
+                                        var allANodes = htmlNode.SelectNodes("//a");
+                                        if (allANodes != null && allANodes.Count > 0)
+                                        {
+                                            string _allAContent = "";
+                                            foreach (var _aNode in allANodes)
+                                            {
+                                                _allAContent += _aNode.InnerText;
+                                            }
+                                            string _allAContentWithoutBlack = Regex.Replace(_allAContent, @"\s", "");
+
+                                            if ((double)(newPNodeTextWithoutBlack.Length - _allAContentWithoutBlack.Length) / newPNodeTextWithoutBlack.Length <= 0.05)
+                                            {
+                                                baseScore -= 100;
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+
+                        //对于正文字数少于15个的，每少一个扣2分
+                        if (innerTextWithoutBlack.Length < 15)
+                        {
+                            baseScore -= (15 - innerTextWithoutBlack.Length) * 2;
+                        }
                     }
                     else
-                        currentBlackCount = 0;
-                }
+                        continue;
 
-                //针对正文中不常出现的词进行得分降权，每出现一个扣五分
-                if (!string.IsNullOrWhiteSpace(ContentIgnoreText))
-                {
-                    string[] _ignoreTexts = ContentIgnoreText.Split(',');
-                    foreach (string _ignoreText in _ignoreTexts)
+                    //计算正文中的空行，连续的3个空行会扣除一分，每多一个多扣0.2分
+                    string[] orgLines = innerText.Split('\n');
+                    int currentBlackCount = 0;
+                    foreach (string orgLine in orgLines)
                     {
-                        if(!string.IsNullOrWhiteSpace(_ignoreText) && innerText.Contains(_ignoreText))
-                            baseScore -= 5;
+                        if (string.IsNullOrWhiteSpace(orgLine))
+                        {
+                            currentBlackCount++;
+                            if (currentBlackCount == 3)
+                                baseScore--;
+                            else if (currentBlackCount > 3)
+                                baseScore -= 0.2;
+                        }
+                        else
+                            currentBlackCount = 0;
                     }
-                }
 
-                Tuple<string, double> tuple = new Tuple<string, double>(innerNode.InnerHtml, baseScore);
-                itemNodeScores.Add(tuple);
+                    //针对正文中不常出现的词进行得分降权，每出现一个扣五分
+                    if (!string.IsNullOrWhiteSpace(ContentIgnoreText))
+                    {
+                        string[] _ignoreTexts = ContentIgnoreText.Split(',');
+                        foreach (string _ignoreText in _ignoreTexts)
+                        {
+                            if (!string.IsNullOrWhiteSpace(_ignoreText) && innerText.Contains(_ignoreText))
+                                baseScore -= 5;
+                        }
+                    }
+
+                    Tuple<string, double> tuple = new Tuple<string, double>(innerNode.InnerHtml, baseScore);
+                    itemNodeScores.Add(tuple);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("", ex);
+                }
             }
 
             return itemNodeScores.OrderByDescending(f => f.Item2).ToList();
