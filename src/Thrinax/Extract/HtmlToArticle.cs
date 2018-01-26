@@ -50,7 +50,7 @@ namespace Thrinax.Extract
         /// 正文中很难出现的词语，打分时每次出现会扣除五分；所个词语用 ‘,’ 隔开
         /// </summary>
         private static string ContentIgnoreText = ConfigurationManager.AppSettings["Thrinax.ContentIgnoreText"] ??
-            @"版权均属于,Copyright,网站地图,商务合作,书面授权,不得转载,转载自其它媒体,声明：,仅供投资者参考,不构成投资建议,关于我们,ICP备,公网安备,网上传播视听节目许可证,ICP证";
+                                                                      @"版权均属于,Copyright,网站地图,商务合作,书面授权,不得转载,转载自其它媒体,声明：,仅供投资者参考,不构成投资建议,关于我们,ICP备,公网安备,网上传播视听节目许可证,ICP证,证券时报新闻APP,官方新闻客户端,为投资者提供更多财经资讯,扫描二维码添加,来源：,财经资讯、政策解读,股市情报、投资机会";
 
 
         /// <summary>
@@ -310,9 +310,9 @@ namespace Thrinax.Extract
                         }
 
                         //对于正文字数少于15个的，每少一个扣2分
-                        if (innerTextWithoutBlack.Length < 15)
+                        if (innerTextWithoutBlack.Length < 25)
                         {
-                            baseScore -= (15 - innerTextWithoutBlack.Length) * 2;
+                            baseScore -= (25 - innerTextWithoutBlack.Length) * 2;
                         }
                     }
                     else
