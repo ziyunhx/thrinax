@@ -15,7 +15,7 @@ namespace Thrinax.Utility
         /// <summary>
         /// 清洗时去掉的Html标签(其中内容也去掉)
         /// </summary>
-        public static string HtmlRemoveTags_RemoveContent = ConfigurationManager.AppSettings["Thrinax.HtmlRemoveTags_RemoveContent"] ?? @"script obj object param embed map input";
+        public static string HtmlRemoveTags_RemoveContent = ConfigurationManager.AppSettings["Thrinax.HtmlRemoveTags_RemoveContent"] ?? @"script obj object param map input";
 
         /// <summary>
         /// 清洗时去掉的Html标签(其中内容保留)
@@ -25,7 +25,7 @@ namespace Thrinax.Utility
         /// <summary>
         /// 清洗时去掉的Html标签中的属性
         /// </summary>
-        public static string HtmlRemoveProperty = ConfigurationManager.AppSettings["Thrinax.HtmlRemoveProperty"] ?? @"style class id";
+        public static string HtmlRemoveProperty = ConfigurationManager.AppSettings["Thrinax.HtmlRemoveProperty"] ?? @"style class id align";
 
         /// <summary>
         /// 图片的alt属性文字
@@ -33,9 +33,9 @@ namespace Thrinax.Utility
         public static string HtmlImgAltText = ConfigurationManager.AppSettings["Thrinax.HtmlImgAltText"] ?? @"Thrinax";
 
         /// <summary>
-        /// 如果内部内容为空zhe
+        /// 如果内部内容为空则去掉
         /// </summary>
-        public static string HtmlRemoveNullTags = ConfigurationManager.AppSettings["Thrinax.HtmlRemoveNullTags"] ?? @"div span table center iframe";
+        public static string HtmlRemoveNullTags = ConfigurationManager.AppSettings["Thrinax.HtmlRemoveNullTags"] ?? @"div span table center iframe input";
 
         #endregion 配置项
 
@@ -56,102 +56,58 @@ namespace Thrinax.Utility
         /// <returns>整理后的Html(如失败则返回原始串)</returns>
         public static string FormatHtml(string OriHtml, string Url)
         {
-            if (string.IsNullOrEmpty(OriHtml)) return OriHtml;
+            if (string.IsNullOrEmpty(OriHtml))
+                return OriHtml;
 
-            #region 去除不允许的html标签
-
-            foreach (string RemoveTag in HtmlRemoveTags_RemoveContent.Split())
-                OriHtml = HTMLCleaner.StripHtmlTag(OriHtml, RemoveTag, true);
-            foreach (string RemoveTag in HtmlRemoveTags_RemainContent.Split())
-                OriHtml = HTMLCleaner.StripHtmlTag(OriHtml, RemoveTag, false);
-            foreach (string RemoveTag in HtmlRemoveProperty.Split())
-                OriHtml = HTMLCleaner.StripHtmlProperty(OriHtml, RemoveTag);
-
-            #endregion 去除不允许的html标签
-
-            #region some cleanning
-
-            OriHtml = Regex.Replace(OriHtml, @"\n|\r", string.Empty, RegexOptions.None);
-            OriHtml = Regex.Replace(OriHtml, @"\t", " ", RegexOptions.None);
-            OriHtml = Regex.Replace(OriHtml, @"\s*onload=(""|')?\S*(""|')?\s*", string.Empty, RegexOptions.IgnoreCase | RegexOptions.Multiline);
-            OriHtml = Regex.Replace(OriHtml, @"\s*onclick=(""|')?\S*(""|')?\s*", string.Empty, RegexOptions.IgnoreCase | RegexOptions.Multiline);
-            OriHtml = Regex.Replace(OriHtml, @"\s*onmouse\S*=(""|')?\S*(""|')?\s*", string.Empty, RegexOptions.IgnoreCase | RegexOptions.Multiline);
-            OriHtml = HTMLCleaner.CleanSpaces(OriHtml);
-
-
-            if (!OriHtml.Contains("<p>"))
-            {
-                //将<br> <br/> <br /> <br>替换为<p>分隔
-                OriHtml = Regex.Replace(OriHtml, @"<br>|<br />|<br>", "<br/>", RegexOptions.None);
-
-                string[] htmls = OriHtml.Split(new string[] { "<br/>" }, StringSplitOptions.RemoveEmptyEntries);
-                OriHtml = "<p>" + String.Join("</p><p>", htmls) + "</p>";
-            }
-            #endregion some cleanning
-
+            //将文本替换与HtmlNode的部分分离，减少建立Dom树的次数
             #region 加载Doc对象
 
             //加载HtmlDocument（内容为Html片段，可能异常）
-            HtmlDocument doc = new HtmlDocument();
-            bool LoadFail = false;
-            string FailMsg = null;
-            try
-            {
-                doc.LoadHtml(OriHtml);
-            }
-            catch(Exception ex)
-            {
-                LoadFail = true;
-                FailMsg = ex.Message;
-            }
+            HtmlNode oriHtmlNode = HtmlUtility.getSafeHtmlRootNode(OriHtml, true, true);
 
-            if (LoadFail || doc.DocumentNode == null)
-            {
-                Logger.Warn(string.Format("FormatHtml加载HtmlDocument异常:{0},Url={1}", FailMsg, Url));
+            if (oriHtmlNode == null || string.IsNullOrWhiteSpace(oriHtmlNode.InnerText))
                 return OriHtml;
-            }
+
+            oriHtmlNode = oriHtmlNode.SelectSingleNode("//body");
 
             #endregion 加载Doc对象
 
             #region P整理
-            //如果有p标签
-            if (Regex.IsMatch(OriHtml, @"<\s*p(\s|>)", RegexOptions.IgnoreCase))
+            HtmlNodeCollection PNodes = oriHtmlNode.SelectNodes("//p");
+            if (PNodes != null && PNodes.Count > 0)
             {
-                HtmlNodeCollection Ps = doc.DocumentNode.SelectNodes("//p");
-                if (Ps != null && Ps.Count > 0)
+                foreach (HtmlNode node in PNodes)
                 {
-                    foreach (HtmlNode node in Ps)
+                    try
                     {
-                        try
+                        //清理无内容的P
+                        if (string.IsNullOrEmpty(TextCleaner.FullClean(node.InnerHtml, false)))
                         {
-                            //清理无内容的P
-                            if (string.IsNullOrEmpty(TextCleaner.FullClean(node.InnerHtml, false)))
-                            {
-                                node.RemoveAll();
-                            }
-                            else
-                            {
-                                while (node.InnerHtml.TrimStart().StartsWith("&nbsp;", StringComparison.OrdinalIgnoreCase))
-                                    node.InnerHtml = node.InnerHtml.TrimStart().Substring(6);
+                            //可能是为了空一行.
+                            node.RemoveAll();
+                        }
+                        else
+                        {
+                            while (node.InnerHtml.TrimStart().StartsWith("&nbsp;", StringComparison.OrdinalIgnoreCase))
+                                node.InnerHtml = node.InnerHtml.TrimStart().Substring(6);
 
-                                while (node.InnerHtml.TrimStart().StartsWith(" ", StringComparison.OrdinalIgnoreCase))
-                                    node.InnerHtml = node.InnerHtml.TrimStart(' ');
-                            }
+                            while (node.InnerHtml.TrimStart().StartsWith(" ", StringComparison.OrdinalIgnoreCase))
+                                node.InnerHtml = node.InnerHtml.TrimStart(' ');
                         }
-                        catch (Exception ex)
-                        {
-                            Logger.Warn(string.Format("调整内容中p标签时出错:{0},Url={1},P={2}", ex.Message, Url, node.OuterHtml));
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Warn(string.Format("调整内容中p标签时出错:{0},Url={1},P={2}", ex.Message, Url, node.OuterHtml));
                     }
                 }
             }
-
             #endregion P整理
 
+            #region 清理空内容标签
             //清理空内容的标签
             foreach (string RemoveNullTag in HtmlRemoveNullTags.Split())
             {
-                HtmlNodeCollection NullTags = doc.DocumentNode.SelectNodes("//" + RemoveNullTag);
+                HtmlNodeCollection NullTags = oriHtmlNode.SelectNodes("//" + RemoveNullTag);
                 if (NullTags != null && NullTags.Count > 0)
                 {
                     foreach (HtmlNode node in NullTags)
@@ -161,8 +117,7 @@ namespace Thrinax.Utility
                             //清理无内容的P
                             if (string.IsNullOrWhiteSpace(TextCleaner.FullClean(node.InnerHtml, false)))
                             {
-                                doc.DocumentNode.RemoveChild(node);
-                                //node.ParentNode.Remove();
+                                node.ParentNode.RemoveChild(node);
                             }
                         }
                         catch (Exception ex)
@@ -172,171 +127,148 @@ namespace Thrinax.Utility
                     }
                 }
             }
-
-            OriHtml = doc.DocumentNode.InnerHtml;
+            #endregion
 
             #region Img整理
 
-            try
+            HtmlNodeCollection ImgNodes = oriHtmlNode.SelectNodes("//img");
+            if (ImgNodes != null && ImgNodes.Count > 0)
             {
-                //如果有Img标签
-                if (Regex.IsMatch(OriHtml, @"<\s*img(\s|>)", RegexOptions.IgnoreCase))
+                foreach (HtmlNode node in ImgNodes)
                 {
-                    HtmlNodeCollection Imgs = doc.DocumentNode.SelectNodes("//img");
-                    if (Imgs != null && Imgs.Count > 0)
-                        foreach (HtmlNode node in Imgs)
-                        {
-                            //替换alt标签
-                            try
-                            {
-                                if (node.Attributes["alt"] == null)
-                                    node.Attributes.Append("alt", HtmlImgAltText);
-                                else
-                                    node.SetAttributeValue("alt", HtmlImgAltText);
-                            }
-                            catch (Exception ex)
-                            {
-                                Logger.Error(string.Format("替换内容中Img标签的alt属性时出错, Img={0}", node.OuterHtml), ex);
-                            }
+                    //替换alt标签
+                    try
+                    {
+                        if (node.Attributes["alt"] == null)
+                            node.Attributes.Append("alt", HtmlImgAltText);
+                        else
+                            node.SetAttributeValue("alt", HtmlImgAltText);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(string.Format("替换内容中Img标签的alt属性时出错, Img={0}", node.OuterHtml), ex);
+                    }
 
-                            //如果包含real_src，则替换src的值；新浪财经特殊处理逻辑
-                            if (node.Attributes["real_src"] != null && !string.IsNullOrEmpty(node.Attributes["real_src"].Value))
-                            {
-                                if (node.Attributes["src"] == null)
-                                    node.Attributes.Append("src", node.Attributes["real_src"].Value);
-                                else
-                                    node.SetAttributeValue("src", node.Attributes["real_src"].Value);
-                            }
-                            else if(node.Attributes["data-src"] != null && !string.IsNullOrEmpty(node.Attributes["data-src"].Value)) // wechat
-                            {
-                                if (node.Attributes["src"] == null)
-                                    node.Attributes.Append("src", node.Attributes["data-src"].Value);
-                                else
-                                    node.SetAttributeValue("src", node.Attributes["data-src"].Value);
-                            }
+                    //如果包含real_src，则替换src的值；新浪财经特殊处理逻辑
+                    if (node.Attributes["real_src"] != null && !string.IsNullOrEmpty(node.Attributes["real_src"].Value))
+                    {
+                        if (node.Attributes["src"] == null)
+                            node.Attributes.Append("src", node.Attributes["real_src"].Value);
+                        else
+                            node.SetAttributeValue("src", node.Attributes["real_src"].Value);
+                    }
+                    else if (node.Attributes["data-src"] != null && !string.IsNullOrEmpty(node.Attributes["data-src"].Value)) // wechat
+                    {
+                        if (node.Attributes["src"] == null)
+                            node.Attributes.Append("src", node.Attributes["data-src"].Value);
+                        else
+                            node.SetAttributeValue("src", node.Attributes["data-src"].Value);
+                    }
 
-                            //src绝对路径
-                            if (node.Attributes["src"] == null || string.IsNullOrEmpty(node.Attributes["src"].Value) )
-                                node.RemoveAll();
-                            else
-                                try
-                                {
-                                    if (!node.Attributes["src"].Value.StartsWith("http://", StringComparison.OrdinalIgnoreCase) 
-                                        && !node.Attributes["src"].Value.StartsWith("file://", StringComparison.OrdinalIgnoreCase)
-                                        && !node.Attributes["src"].Value.StartsWith("data:", StringComparison.OrdinalIgnoreCase)
-                                        && !node.Attributes["src"].Value.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-                                        node.Attributes["src"].Value = new Uri(new Uri(Url), node.Attributes["src"].Value).AbsoluteUri;
-
-                                    //粗暴的认为在非主域名上的Url包含 icon 的都是表情，移除掉
-                                    if (new Uri(node.Attributes["src"].Value).PathAndQuery.Contains("icon"))
-                                        node.RemoveAll();
-                                    else
-                                    {
-
-                                        //去掉图片名为各大社交分享平台的图标 （wechat,weibo,qq,qzone,sina,renren,kaixin,baidu,tieba,fetion,fbook,facebook,twitter,linkedin,sohu）
-                                        string chatImage = @"(wechat\.|weibo\.|qq\.|qzone\.|sina\.|renren\.|kaixin\.|baidu\.|tieba\.|fetion\.|fbook\.|facebook\.|twitter\.|linkedin\.|sohu\.)";
-
-                                        if (Regex.IsMatch(node.Attributes["src"].Value, chatImage, RegexOptions.IgnoreCase))
-                                            node.RemoveAll();
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    Logger.Error(string.Format("FormatHtml替换内容中Img标签的src属性时出错, Url={0} Img={1}\n", Url, node.OuterHtml), ex);
-                                }
-                        }
-                }
-
-                //删除空的img标签
-                OriHtml = OriHtml.Replace("<img>", "").Replace("<img/>", "");
-            }
-            catch
-            { }
-            #endregion Img整理
-
-            #region 视频标签处理
-            //常见视频网站：
-            //优酷网/爱奇艺/土豆网/搜狐视频/迅雷看看/凤凰视频/腾讯视频/新浪视频/56网/CNTV视频/酷6网/暴风影音/乐视网/PPS/风行/PPTV
-            //百度视频/糖豆网/芒果TV/激动网/第一视频/爆米花视频/华数TV/爱拍原创/百度影音/熊猫频道/YY直播/播视网/A站/B站 
-            //目前仅考虑 优酷 腾讯视频
-            string youkuRegex = @"youku\.com/player\.php/sid/(?<youkuId>[^/]*)/";
-            string youkuFmt = "<iframe width=\"100%\" src=\"http://player.youku.com/embed/{0}\" frameborder=0 allowfullscreen></iframe>";
-
-            string qqRegex = @"video\.qq\.com.{5,15}vid=(?<qqId>[^&]*)&";
-            string qqFmt = "<iframe width=\"100%\" src=\"http://v.qq.com/iframe/player.html?vid={0}&tiny=0&auto=0\" frameborder=0 allowfullscreen></iframe>";
-
-            //视频格式 avi,rmvb,rm,mkv,mp4,3gp,flv,swf
-
-            //TODO: 对支持的几种格式替换为iframe形式以实现多平台访问
-
-            //取出已知的几种视频格式，仅保留src与type，allowscriptaccess，allowfullscreen，wmode
-            if (Regex.IsMatch(OriHtml, @"<\s*embed[^>]+\.(avi|rmvb|rm|mkv|mp4|3gp|flv|swf)", RegexOptions.IgnoreCase))
-            {                
-                HtmlNodeCollection As = doc.DocumentNode.SelectNodes("//embed");
-                if (As != null && As.Count > 0)
-                {
-                    foreach (HtmlNode node in As)
+                    //src绝对路径
+                    if (node.Attributes["src"] == null || string.IsNullOrEmpty(node.Attributes["src"].Value))
+                        node.RemoveAll();
+                    else
                     {
                         try
                         {
-                            //保存下src和type的值
-                            string tempsrc = "", temptype = "";
-                            if (node.Attributes["src"] != null)
-                                tempsrc = node.Attributes["src"].Value;
-                            if (!Regex.IsMatch(tempsrc, @"\.(avi|rmvb|rm|mkv|mp4|3gp|flv|swf)", RegexOptions.IgnoreCase))
-                                continue;
+                            if (!node.Attributes["src"].Value.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+                                && !node.Attributes["src"].Value.StartsWith("file://", StringComparison.OrdinalIgnoreCase)
+                                && !node.Attributes["src"].Value.StartsWith("data:", StringComparison.OrdinalIgnoreCase)
+                                && !node.Attributes["src"].Value.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+                                && !node.Attributes["src"].Value.StartsWith("//", StringComparison.OrdinalIgnoreCase))
+                                node.Attributes["src"].Value = new Uri(new Uri(Url), node.Attributes["src"].Value).AbsoluteUri;
 
-                            if (node.Attributes["type"] != null)
-                            temptype = node.Attributes["type"].Value;
-                            //清除其它的attribute
-                            node.Attributes.RemoveAll();
+                            //粗暴的认为在非主域名上的Url包含 icon 的都是表情，移除掉
+                            if (new Uri(node.Attributes["src"].Value).PathAndQuery.Contains("icon"))
+                                node.RemoveAll();
+                            else
+                            {
+                                //去掉图片名为各大社交分享平台的图标 （wechat,weibo,qq,qzone,sina,renren,kaixin,baidu,tieba,fetion,fbook,facebook,twitter,linkedin,sohu）
+                                string chatImage = @"(wechat\.|weibo\.|qq\.|qzone\.|sina\.|renren\.|kaixin\.|baidu\.|tieba\.|fetion\.|fbook\.|facebook\.|twitter\.|linkedin\.|sohu\.)";
 
-                            if(!string.IsNullOrEmpty(tempsrc))
-                                node.Attributes.Append("src", tempsrc);
-                            if(!string.IsNullOrEmpty(temptype))
-                                node.Attributes.Append("type", temptype);
-
-                            node.Attributes.Append("width", "always");
-                            node.Attributes.Append("allowfullscreen", "true");
-                            node.Attributes.Append("wmode", "opaque");
-                            //node.Attributes.Append("allowscriptaccess", "always");
+                                if (Regex.IsMatch(node.Attributes["src"].Value, chatImage, RegexOptions.IgnoreCase))
+                                    node.RemoveAll();
+                            }
                         }
                         catch (Exception ex)
                         {
-                            Logger.Error(string.Format("替换视频标签属性时出错, film={0}", node.OuterHtml), ex);
+                            Logger.Error(string.Format("FormatHtml替换内容中Img标签的src属性时出错, Url={0} Img={1}\n", Url, node.OuterHtml), ex);
                         }
                     }
                 }
+            }
+            #endregion Img整理
 
-                //针对Iframe的视频地址去除高宽
-                HtmlNodeCollection Iframe = doc.DocumentNode.SelectNodes("//iframe");
-                if (Iframe != null && Iframe.Count > 0)
+            #region 视频标签处理
+            //常见视频网站：需进一步完善
+            //优酷网/爱奇艺/土豆网/搜狐视频/迅雷看看/凤凰视频/腾讯视频/新浪视频/56网/CNTV视频/酷6网/暴风影音/乐视网/PPS/风行/PPTV
+            //百度视频/糖豆网/芒果TV/激动网/第一视频/爆米花视频/华数TV/爱拍原创/百度影音/熊猫频道/YY直播/播视网/A站/B站 
+            //取出已知的几种视频格式，仅保留src与type，allowscriptaccess，allowfullscreen，wmode
+            HtmlNodeCollection embedNodes = oriHtmlNode.SelectNodes("//embed");
+            if (embedNodes != null && embedNodes.Count > 0)
+            {
+                foreach (HtmlNode node in embedNodes)
                 {
-                    foreach (HtmlNode node in Iframe)
+                    try
                     {
-                        try
-                        {
-                            //保存下src和type的值
-                            string tempsrc = "", temptype = "";
-                            if (node.Attributes["src"] != null)
-                                tempsrc = node.Attributes["src"].Value;
-                            if (!Regex.IsMatch(tempsrc, @"\.(avi|rmvb|rm|mkv|mp4|3gp|flv|swf)", RegexOptions.IgnoreCase))
-                                continue;
-                            //清除其它的attribute
-                            node.Attributes.RemoveAll();
+                        //保存下src和type的值
+                        string tempsrc = "", temptype = "";
+                        if (node.Attributes["src"] != null)
+                            tempsrc = node.Attributes["src"].Value;
+                        if (!Regex.IsMatch(tempsrc, @"\.(avi|rmvb|rm|mkv|mp4|3gp|flv|swf)", RegexOptions.IgnoreCase))
+                            continue;
 
-                            if (!string.IsNullOrEmpty(tempsrc))
-                                node.Attributes.Append("src", tempsrc);
+                        if (node.Attributes["type"] != null)
+                            temptype = node.Attributes["type"].Value;
+                        //清除其它的attribute
+                        node.Attributes.RemoveAll();
 
-                            node.Attributes.Append("allowscriptaccess", "100%");
-                            node.Attributes.Append("allowfullscreen", "true");
-                            node.Attributes.Append("frameborder", "0");
-                            //node.Attributes.Append("allowscriptaccess", "always");
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Error(string.Format("替换视频标签属性时出错, film={0}", node.OuterHtml), ex);
-                        }
+                        if (!string.IsNullOrEmpty(tempsrc))
+                            node.Attributes.Append("src", tempsrc);
+                        if (!string.IsNullOrEmpty(temptype))
+                            node.Attributes.Append("type", temptype);
+
+                        node.Attributes.Append("width", "always");
+                        node.Attributes.Append("allowfullscreen", "true");
+                        node.Attributes.Append("wmode", "opaque");
+                        //node.Attributes.Append("allowscriptaccess", "always");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(string.Format("替换视频标签属性时出错, film={0}", node.OuterHtml), ex);
+                    }
+                }
+            }
+
+            //针对Iframe的视频地址去除高宽
+            HtmlNodeCollection IframeNodes = oriHtmlNode.SelectNodes("//iframe");
+            if (IframeNodes != null && IframeNodes.Count > 0)
+            {
+                foreach (HtmlNode node in IframeNodes)
+                {
+                    try
+                    {
+                        //保存下src和type的值
+                        string tempsrc = "";
+                        if (node.Attributes["src"] != null)
+                            tempsrc = node.Attributes["src"].Value;
+                        if (!Regex.IsMatch(tempsrc, @"\.(avi|rmvb|rm|mkv|mp4|3gp|flv|swf)", RegexOptions.IgnoreCase))
+                            continue;
+                        //清除其它的attribute
+                        node.Attributes.RemoveAll();
+
+                        if (!string.IsNullOrEmpty(tempsrc))
+                            node.Attributes.Append("src", tempsrc);
+
+                        node.Attributes.Append("allowscriptaccess", "100%");
+                        node.Attributes.Append("allowfullscreen", "true");
+                        node.Attributes.Append("frameborder", "0");
+                        //node.Attributes.Append("allowscriptaccess", "always");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(string.Format("替换视频标签属性时出错, film={0}", node.OuterHtml), ex);
                     }
                 }
             }
@@ -344,37 +276,60 @@ namespace Thrinax.Utility
             #endregion
 
             #region a整理
-
-            //如果有a标签
-            if (Regex.IsMatch(OriHtml, @"<\s*a[^>]+href[^>]+", RegexOptions.IgnoreCase))
+            HtmlNodeCollection ANodes = oriHtmlNode.SelectNodes("//a[@href]");
+            if (ANodes != null && ANodes.Count > 0)
             {
-                try
+                foreach (HtmlNode node in ANodes)
                 {
-                    HtmlNodeCollection As = doc.DocumentNode.SelectNodes("//a[@href]");
-                    if (As != null && As.Count > 0)
-                        foreach (HtmlNode node in As)
-                            try
-                            {
-                                string href = HTMLCleaner.CleanUrl(node.Attributes["href"].Value);
-                                if (!string.IsNullOrEmpty(href) && !node.Attributes["href"].Value.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                                    node.Attributes["href"].Value = new Uri(new Uri(Url), node.Attributes["href"].Value).AbsoluteUri;
-                                else
-                                    node.Attributes["href"].Value = href;
-                            }
-                            catch (Exception ex)
-                            {
-                                Logger.Error(string.Format("FormatHtml替换内容中a标签的href属性时出错, href={0}", node.Attributes["href"].Value), ex);
-                            }
-                }
-                catch (Exception ex)
-                {
-                    Logger.Warn(string.Format("FormatHtml选择内容中a标签时出错:{1}, Url={0}", Url, ex.Message));
+                    try
+                    {
+                        string href = HTMLCleaner.CleanUrl(node.Attributes["href"].Value);
+                        if (!string.IsNullOrEmpty(href) && !node.Attributes["href"].Value.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                            node.Attributes["href"].Value = new Uri(new Uri(Url), node.Attributes["href"].Value).AbsoluteUri;
+                        else
+                            node.Attributes["href"].Value = href;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(string.Format("FormatHtml替换内容中a标签的href属性时出错, href={0}", node.Attributes["href"].Value), ex);
+                    }
                 }
             }
-
             #endregion a整理
 
-            return doc.DocumentNode.OuterHtml;
+            string outHtml = oriHtmlNode.InnerHtml;
+            //下面开始字符的替换操作
+            #region 去除不允许的html标签
+            foreach (string RemoveTag in HtmlRemoveTags_RemoveContent.Split())
+                outHtml = HTMLCleaner.StripHtmlTag(outHtml, RemoveTag, true);
+            foreach (string RemoveTag in HtmlRemoveTags_RemainContent.Split())
+                outHtml = HTMLCleaner.StripHtmlTag(outHtml, RemoveTag, false);
+            foreach (string RemoveTag in HtmlRemoveProperty.Split())
+                outHtml = HTMLCleaner.StripHtmlProperty(outHtml, RemoveTag);
+            #endregion 去除不允许的html标签
+
+            #region some cleanning
+            outHtml = Regex.Replace(outHtml, @"\n|\r", string.Empty, RegexOptions.None);
+            outHtml = Regex.Replace(outHtml, @"\t", " ", RegexOptions.None);
+            outHtml = Regex.Replace(outHtml, @"\s*onload=(""|')?\S*(""|')?\s*", string.Empty, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            outHtml = Regex.Replace(outHtml, @"\s*onclick=(""|')?\S*(""|')?\s*", string.Empty, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            outHtml = Regex.Replace(outHtml, @"\s*onmouse\S*=(""|')?\S*(""|')?\s*", string.Empty, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            outHtml = HTMLCleaner.CleanSpaces(outHtml);
+            #endregion some cleanning
+
+            //清理空的<>;《》;（）;();{};[];""
+            outHtml = Regex.Replace(outHtml, @"<\s*?>", "", RegexOptions.None);
+            outHtml = Regex.Replace(outHtml, @"《\s*?》", "", RegexOptions.None);
+            outHtml = Regex.Replace(outHtml, @"（\s*?）", "", RegexOptions.None);
+            outHtml = Regex.Replace(outHtml, @"\(\s*?\)", "", RegexOptions.None);
+            outHtml = Regex.Replace(outHtml, @"{\s*?}", "", RegexOptions.None);
+            outHtml = Regex.Replace(outHtml, @"\[\s*?\]", "", RegexOptions.None);
+            outHtml = Regex.Replace(outHtml, "\"\\s*?\"", "", RegexOptions.None);
+
+            //删除空的img标签
+            outHtml = outHtml.Replace("<img>", "").Replace("<img/>", "");
+
+            return outHtml;
         }
     }
 }

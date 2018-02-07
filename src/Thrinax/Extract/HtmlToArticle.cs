@@ -68,9 +68,13 @@ namespace Thrinax.Extract
                 backupHtml = Regex.Replace(backupHtml, filter[0], filter[1]);
             }
 
+            HtmlNode itemHtmlNode = HtmlUtility.getSafeHtmlRootNode(backupHtml, true, true);
             Article article = new Article();
 
-            article.Title = Regex.Replace(GetTitle(html), @"\s", "");
+            string title = GetTitle(itemHtmlNode);
+            if (!string.IsNullOrWhiteSpace(title))
+                article.Title = Regex.Replace(title, @"\s", "");
+
             string dateTimeStr = GetPublishDate(backupHtml);
 
             article.PubDate = DateTimeParser.Parser(dateTimeStr);
@@ -85,14 +89,12 @@ namespace Thrinax.Extract
         /// <summary>
         /// 获取标题
         /// </summary>
-        /// <param name="html"></param>
+        /// <param name="htmlNode"></param>
         /// <returns></returns>
-        private static string GetTitle(string html)
+        private static string GetTitle(HtmlNode htmlNode)
         {
-            HtmlNode itempagenode = HtmlUtility.getSafeHtmlRootNode(html, true, true);
-
             string title = "";
-            HtmlNode titleHtmlNode = itempagenode.SelectSingleNode("//title");
+            HtmlNode titleHtmlNode = htmlNode.SelectSingleNode("//title");
             if (titleHtmlNode != null)
             {
                 string perTitle = titleHtmlNode.InnerText;
@@ -101,7 +103,7 @@ namespace Thrinax.Extract
             }
 
             // 正文的标题一般在h1中，比title中的标题更干净
-            HtmlNode h1HtmlNode = itempagenode.SelectSingleNode("//h1");
+            HtmlNode h1HtmlNode = htmlNode.SelectSingleNode("//h1");
             if (h1HtmlNode != null)
             {
                 string perTitle = h1HtmlNode.InnerText;
@@ -116,19 +118,31 @@ namespace Thrinax.Extract
         }
 
         /// <summary>
-        /// 获取文章发布日期
+        /// 获取标题
         /// </summary>
         /// <param name="html"></param>
         /// <returns></returns>
-        private static string GetPublishDate(string html)
+        private static string GetTitle(string html)
         {
-            if (string.IsNullOrWhiteSpace(html))
+            HtmlNode itempagenode = HtmlUtility.getSafeHtmlRootNode(html, true, true);
+
+            return GetTitle(itempagenode);
+        }
+
+        /// <summary>
+        /// 获取文章发布日期
+        /// </summary>
+        /// <param name="htmlNode"></param>
+        /// <returns></returns>
+        private static string GetPublishDate(HtmlNode htmlNode)
+        {
+            if (htmlNode == null || string.IsNullOrWhiteSpace(htmlNode.OuterHtml))
                 return "";
 
             string maybeDateStr = @"0123456789分钟前小时秒半天昨年月日期间发表于布稿出:：/-.更新上线星期周";
 
             // 过滤html标签，防止标签对日期提取产生影响
-            string text = Regex.Replace(html, "(?is)<.*?>", "");
+            string text = htmlNode.InnerText;
             Match match = Regex.Match(
                 text,
                 @"((\d{4}|\d{2})(\-|\/)\d{1,2}\3\d{1,2})(\s?\d{2}:\d{2})?|(\d{4}年\d{1,2}月\d{1,2}日)(\s?\d{2}:\d{2})?",
@@ -151,13 +165,12 @@ namespace Thrinax.Extract
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex);
+                    Logger.Error("Error Parser the publish date.", ex);
                 }
             }
             else
             {
                 //解析所有文本的块，获取包含maybeDateStr的字符串，对长短和命中率进行打分排序
-                HtmlNode htmlNode = HtmlUtility.getSafeHtmlRootNode(html, true, true);
                 var itemDateNodes = htmlNode.SelectNodes("//*");
                 if (itemDateNodes != null && itemDateNodes.Count > 0)
                 {
@@ -165,7 +178,7 @@ namespace Thrinax.Extract
                     foreach (var itemDateNode in itemDateNodes)
                     {
                         string _itemDateText = Regex.Replace(itemDateNode.InnerText, @"\s", "");
-                        if (!string.IsNullOrWhiteSpace(_itemDateText) && maybeDateStr.Any(f=> _itemDateText.Contains(f)) && _itemDateText.Length < 30)
+                        if (!string.IsNullOrWhiteSpace(_itemDateText) && maybeDateStr.Any(f => _itemDateText.Contains(f)) && _itemDateText.Length < 30)
                         {
                             dateStrDic[_itemDateText] = maybeDateStr.Count(f => _itemDateText.Contains(f)) * 2 - Math.Abs(6 - _itemDateText.Length);
                         }
@@ -179,24 +192,49 @@ namespace Thrinax.Extract
         }
 
         /// <summary>
+        /// 获取文章发布日期
+        /// </summary>
+        /// <param name="html"></param>
+        /// <returns></returns>
+        private static string GetPublishDate(string html)
+        {
+            HtmlNode htmlNode = HtmlUtility.getSafeHtmlRootNode(html, true, true);
+            return GetPublishDate(htmlNode);
+        }
+
+        /// <summary>
         /// Gets the content of the html.
         /// </summary>
         /// <returns>The html content.</returns>
         /// <param name="bodyText">Body text.</param>
         /// <param name="Title">Title.</param>
         /// <param name="dateTimeStr">Date time string.</param>
-        private static string GetHtmlContent(string bodyText, string Title, string dateTimeStr)
+        private static string GetHtmlContent(HtmlNode htmlNode, string title, string dateTimeStr)
         {
-            string baseHtmlContent = bodyText;
-
             //首先通过Html的div标签拆解元素打分
-            List<Tuple<string, double>> listNodes = SplitHtmlTextByBlockElement(bodyText);
+            List<Tuple<string, double>> listNodes = SplitHtmlTextByBlockElement(htmlNode);
             if (listNodes != null && listNodes.Count > 0)
             {
-                baseHtmlContent = listNodes.OrderByDescending(f => f.Item2).FirstOrDefault().Item1;
+                string baseHtmlContent = listNodes.OrderByDescending(f => f.Item2).FirstOrDefault().Item1;
+
+                return baseHtmlContent;
             }
 
-            return baseHtmlContent;
+            return "";
+        }
+
+        /// <summary>
+        /// Gets the content of the html.
+        /// </summary>
+        /// <returns>The html content.</returns>
+        /// <param name="bodyText">Body text.</param>
+        /// <param name="Title">Title.</param>
+        /// <param name="dateTimeStr">Date time string.</param>
+        private static string GetHtmlContent(string html, string title, string dateTimeStr)
+        {
+            HtmlNode itempagenode = HtmlUtility.getSafeHtmlRootNode(html, true, true);
+
+            return GetHtmlContent(itempagenode, title, dateTimeStr);
         }
 
         /// <summary>
@@ -207,14 +245,12 @@ namespace Thrinax.Extract
         /// </summary>
         /// <param name="htmlContent"></param>
         /// <returns></returns>
-        public static List<Tuple<string, double>> SplitHtmlTextByBlockElement(string htmlContent)
+        public static List<Tuple<string, double>> SplitHtmlTextByBlockElement(HtmlNode itempagenode)
         {
-            if (string.IsNullOrWhiteSpace(htmlContent))
+            if (itempagenode == null || string.IsNullOrWhiteSpace(itempagenode.OuterHtml))
                 return null;
-
-            HtmlNode itempagenode = HtmlUtility.getSafeHtmlRootNode(htmlContent, true, true).SelectSingleNode("//body");
+            
             var itemNodes = itempagenode.SelectNodes("//div");
-
             if (itemNodes == null || itemNodes.Count == 0)
                 return null;
 
@@ -227,11 +263,10 @@ namespace Thrinax.Extract
                         continue;
 
                     double baseScore = 15;
-
-                    HtmlNode innerNode = HtmlUtility.getSafeHtmlRootNode(itemNode.OuterHtml, true, true).SelectSingleNode("//body");
+                    HtmlNode innerNode = itemNode;
 
                     //子元素出现一次div且内容不为空的 扣 3 分
-                    var innerDivs = innerNode.SelectNodes("//div");
+                    var innerDivs = innerNode.SelectNodes(".//div");
                     if (innerDivs != null && innerDivs.Count > 1)
                     {
                         foreach (var innerDiv in innerDivs)
@@ -242,7 +277,7 @@ namespace Thrinax.Extract
                     }
 
                     //子元素出现一次a 扣 2 分
-                    var inneras = innerNode.SelectNodes("//a");
+                    var inneras = innerNode.SelectNodes(".//a");
                     if (inneras != null && inneras.Count > 0)
                     {
                         baseScore -= inneras.Count * 2;
@@ -257,25 +292,32 @@ namespace Thrinax.Extract
                         {
                             baseScore += (double)innerTextWithoutBlack.Length / 20;
 
+                            HtmlNode _divHtmlNode = null;
+                            if (itemNode.HasChildNodes && itemNode.ChildNodes.Count(f => f.Name == "p") > 0)
+                                _divHtmlNode = itemNode;
+                            else
+                                _divHtmlNode = innerNode.SelectSingleNode("./div");
+
                             //Node中出现超过1个P标签的，同时判断所有 P 元素的字数 与 innerTextWithoutBlack 的字数，差值小于10%时替换，P 元素每增加一个得一分；
-                            if (innerNode.SelectSingleNode("//div").ChildNodes.Count(f => f.Name == "p") > 0)
+                            if (_divHtmlNode != null && _divHtmlNode.HasChildNodes && _divHtmlNode.ChildNodes.Count(f => f.Name == "p") > 0)
                             {
                                 //针对P元素内有a标签的进行得分惩罚，存在则扣2分
                                 int aScore = 0;
-                                HtmlNode htmlNode = HtmlUtility.getSafeHtmlRootNode("", true, true).SelectSingleNode("//body");
-                                foreach (HtmlNode _tmpNode in innerNode.SelectSingleNode("//div").ChildNodes)
+                                HtmlDocument htmlDocument = new HtmlDocument();
+                                foreach (HtmlNode _tmpNode in _divHtmlNode.ChildNodes)
                                 {
-                                    if (_tmpNode.Name == "p")
+                                    //同时保留Pre标签，因为里面很有可能是源码；以及img标签
+                                    if (_tmpNode.Name == "p" || _tmpNode.Name == "pre" || _tmpNode.Name == "img")
                                     {
-                                        var aNodes = _tmpNode.SelectNodes("//a");
+                                        var aNodes = _tmpNode.SelectNodes(".//a");
                                         if (aNodes != null && aNodes.Count > 0)
                                             aScore += 2;
 
-                                        htmlNode.AppendChild(_tmpNode);
+                                        htmlDocument.DocumentNode.AppendChild(_tmpNode);
                                     }
                                 }
 
-                                string newPNodeText = htmlNode.InnerText;
+                                string newPNodeText = htmlDocument.DocumentNode.InnerText;
                                 if (!string.IsNullOrWhiteSpace(newPNodeText))
                                 {
                                     string newPNodeTextWithoutBlack = Regex.Replace(newPNodeText, @"\s", "");
@@ -283,12 +325,12 @@ namespace Thrinax.Extract
                                     if (!string.IsNullOrWhiteSpace(newPNodeTextWithoutBlack) && newPNodeTextWithoutBlack.Length > 0
                                         && ((double)(innerTextWithoutBlack.Length - newPNodeTextWithoutBlack.Length) / innerTextWithoutBlack.Length <= 0.1))
                                     {
-                                        innerNode = htmlNode;
+                                        innerNode = htmlDocument.DocumentNode;
                                         innerText = newPNodeText;
-                                        baseScore = 15 + newPNodeTextWithoutBlack.Length / 20 + (htmlNode.ChildNodes.Count - 1) - aScore;
+                                        baseScore = 15 + newPNodeTextWithoutBlack.Length / 20 + (htmlDocument.DocumentNode.ChildNodes.Count - 1) - aScore;
 
                                         //a标签内的文字与总文字相差小于95%时扣100分
-                                        var allANodes = htmlNode.SelectNodes("//a");
+                                        var allANodes = htmlDocument.DocumentNode.SelectNodes("//a");
                                         if (allANodes != null && allANodes.Count > 0)
                                         {
                                             string _allAContent = "";
@@ -303,11 +345,13 @@ namespace Thrinax.Extract
                                                 baseScore -= 100;
                                             }
                                         }
-
                                     }
                                 }
                             }
                         }
+
+                        if (string.IsNullOrWhiteSpace(innerTextWithoutBlack))
+                            continue;
 
                         //对于正文字数少于15个的，每少一个扣2分
                         if (innerTextWithoutBlack.Length < 25)
@@ -346,12 +390,15 @@ namespace Thrinax.Extract
                         }
                     }
 
+                    if (innerNode == null || string.IsNullOrWhiteSpace(innerNode.OuterHtml) || string.IsNullOrWhiteSpace(innerNode.InnerHtml))
+                        continue;
+
                     Tuple<string, double> tuple = new Tuple<string, double>(innerNode.InnerHtml, baseScore);
                     itemNodeScores.Add(tuple);
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error("", ex);
+                    Logger.Error(string.Format("Split HtmlText By BlockElement Error. Node: {0}, Ex: {1}.", itemNode.OuterHtml, ex.StackTrace), ex);
                 }
             }
 

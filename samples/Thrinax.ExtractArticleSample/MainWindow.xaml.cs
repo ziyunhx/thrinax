@@ -23,17 +23,14 @@ namespace Thrinax.ExtractArticleSample
             if (!string.IsNullOrWhiteSpace(txt_url.Text))
             {
                 currentUrl = txt_url.Text;
-                string htmlContent = HttpHelper.GetHttpContent(currentUrl);
 
-                Article article = HtmlToArticle.GetArticle(htmlContent);
+                Article article = ThrinaxHelper.GetArticleAndFormatter(currentUrl);
 
                 if (article != null && !string.IsNullOrWhiteSpace(article.Title))
                 {
                     txt_title.Text = article.Title;
                     txt_pubdate.Text = article.PubDate.ToString();
-
-                    if (!string.IsNullOrWhiteSpace(article.HtmlContent))
-                        txt_content.Text = HtmlFormattor.FormatHtml(article.HtmlContent, currentUrl);
+                    txt_content.Text = article.HtmlContent;
                 }
                 else
                 {

@@ -4,7 +4,7 @@ namespace Thrinax
 {
     public class Logger
     {
-        private static readonly log4net.ILog m_log = log4net.LogManager.GetLogger(typeof(Logger));
+        private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Logger));
 
         /// <summary>
         /// Debug the specified message and e.
@@ -14,7 +14,7 @@ namespace Thrinax
         /// <param name="e">E.</param>
         public static void Debug(string message, Exception e = null)
         {
-            m_log.Debug(message, e);
+            logger.Debug(message, e);
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Thrinax
         /// <param name="e">E.</param>
         public static void Info(string message, Exception e = null)
         {
-            m_log.Info(message, e);
+            logger.Info(message, e);
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Thrinax
         /// <param name="e">E.</param>
         public static void Warn(string message, Exception e = null)
         {
-            m_log.Warn(message, e);
+            logger.Warn(message, e);
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace Thrinax
         /// <param name="e">E.</param>
         public static void Error(string message, Exception e = null)
         {
-            m_log.Error(message, e);
+            logger.Error(message, e);
         }
     }
 }
