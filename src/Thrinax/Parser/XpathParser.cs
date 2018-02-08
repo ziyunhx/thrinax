@@ -175,12 +175,15 @@ namespace Thrinax.Parser
                         continue;
 
                     //如果 BaseNode 的数量小于6，则判断是否存在多个可匹配的 Title 项；如果存在的话则记录数量
-                    int singleNodeItemCount = BaseNode.SelectNodes(Path.TitleXPath).Where(n => n.Attributes.Contains("href")).Count();
+                    List<HtmlNode> nodecollection = new List<HtmlNode>();
+                    int singleNodeItemCount = 0;
 
-                    if (singleNodeItemCount <= 0)
-                        singleNodeItemCount = 1;
+                    if (!string.IsNullOrWhiteSpace(Path.UrlXPath))
+                        nodecollection = BaseNode.SelectNodes(Path.UrlXPath).Where(n => n.Attributes.Contains("href")).ToList();
+                    else
+                        nodecollection = BaseNode.SelectNodes(Path.TitleXPath).Where(n => n.Attributes.Contains("href")).ToList();
 
-                    List<HtmlNode> nodecollection = BaseNode.SelectNodes(Path.TitleXPath).Where(n => n.Attributes.Contains("href")).ToList();
+                    singleNodeItemCount = nodecollection?.Count ?? 0;
 
                     if (nodecollection != null && nodecollection.Count() > 0 && nodecollection.Any(n => !string.IsNullOrEmpty(n.Attributes["href"].Value)))
                     {
