@@ -61,8 +61,6 @@ namespace Thrinax.Utility.Smart
 
         }
 
-        //public ItemPageXPath ItemPageXPath { get; set; }
-
         public override string ToString()
         {
             return string.Format("Base: {0} Title: {1} Count: {2} Score: {3}", Path.ItemRootXPath, Path.TitleXPath, Contents?.Length ?? 0, TotalScore);

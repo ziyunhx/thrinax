@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Thrinax.Interface;
 using Thrinax.Models;
 using Thrinax.Utility;
 
@@ -10,17 +9,17 @@ namespace Thrinax.Parser
     /// <summary>
     /// 正则解析类
     /// </summary>
-    public class RegexParser : IParser
+    public class RegexParser
     {
-         /// <summary>
-         /// Parses the list.
-         /// </summary>
-         /// <returns>The list.</returns>
-         /// <param name="Html">Html.</param>
-         /// <param name="Pattern">Pattern.</param>
-         /// <param name="Url">URL.</param>
-         /// <param name="RecogNextPage">If set to <c>true</c> recog next page.</param>
-        public ArticleList ParseList(string Html, string Pattern, string Url = null, bool RecogNextPage = true)
+        /// <summary>
+        /// Parses the list.
+        /// </summary>
+        /// <returns>The list.</returns>
+        /// <param name="Html">Html.</param>
+        /// <param name="Pattern">Pattern.</param>
+        /// <param name="Url">URL.</param>
+        /// <param name="RecogNextPage">If set to <c>true</c> recog next page.</param>
+        public static ArticleList ParseList(string Html, string Pattern, string Url = null, bool RecogNextPage = true)
         {
             //输入检查
             if (string.IsNullOrWhiteSpace(Html) || string.IsNullOrWhiteSpace(Pattern))
@@ -90,7 +89,7 @@ namespace Thrinax.Parser
         /// <param name="Pattern">Pattern.</param>
         /// <param name="Url">URL.</param>
         /// <param name="BaseArticle">Base article.</param>
-        public bool ParseItem(string Html, string Pattern, string Url, ref Article BaseArticle)
+        public static bool ParseItem(string Html, string Pattern, string Url, ref Article BaseArticle)
         {
 #if !NET40
             Match m = Regex.Match(Html, Pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline, new TimeSpan(0, 0, 10));

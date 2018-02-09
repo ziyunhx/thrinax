@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Thrinax.Http;
-using Thrinax.Interface;
 using Thrinax.Models;
 using Thrinax.Utility;
 
@@ -15,13 +14,13 @@ namespace Thrinax.Parser
     /// <summary>
     /// 通过 Xpath 获取 Article
     /// </summary>
-    public class XpathParser : IParser
+    public class XpathParser
     {
         private static ParallelOptions _parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 5 };
         private static object syncObj = new object();
         private static object patternsObj = new object();
 
-        public ArticleList ParseList(string Html, string Pattern, string Url = null, bool RecogNextPage = true)
+        public static ArticleList ParseList(string Html, string Pattern, string Url = null, bool RecogNextPage = true)
         {
             //输入检查
             if (string.IsNullOrWhiteSpace(Html) || string.IsNullOrWhiteSpace(Pattern))
@@ -55,7 +54,7 @@ namespace Thrinax.Parser
             return articleList;
         }
 
-        public bool ParseItem(string Html, string Pattern, string Url, ref Article BaseArticle)
+        public static bool ParseItem(string Html, string Pattern, string Url, ref Article BaseArticle)
         {
             //输入检查
             if (string.IsNullOrWhiteSpace(Html) || string.IsNullOrWhiteSpace(Pattern))
@@ -191,6 +190,7 @@ namespace Thrinax.Parser
 
                         for (int i = 0; i < singleNodeItemCount; i++)
                         {
+                            articleNodeItems[i] = new Article();
                             articleNodeItems[i].Title = ExtractInnerTextFromBaseNode(BaseNode, Path.TitleXPath, i);
                             if (articleNodeItems[i].Title != null)
                             {

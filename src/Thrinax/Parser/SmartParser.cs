@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 using Thrinax.Enums;
 using Thrinax.Extract;
 using Thrinax.Http;
-using Thrinax.Interface;
 using Thrinax.Models;
 using Thrinax.Utility;
 using Thrinax.Utility.Smart;
@@ -15,9 +14,9 @@ using Thrinax.Utility.Smart;
 namespace Thrinax.Parser
 {
 
-    public class SmartParser : IParser
+    public class SmartParser
     {
-        public ArticleList ParseList(string Html, string Pattern, string Url = null, bool RecogNextPage = true)
+        public static ArticleList ParseList(string Html, string Pattern, string Url = null, bool RecogNextPage = true)
         {
             //输入检查
             if (string.IsNullOrWhiteSpace(Html))
@@ -31,7 +30,7 @@ namespace Thrinax.Parser
                 {
                     xpathPattern = JsonConvert.DeserializeObject<XpathPattern>(Pattern);
                     if (xpathPattern != null)
-                        return new XpathParser().ParseList(Html, Pattern, Url, RecogNextPage);
+                        return XpathParser.ParseList(Html, Pattern, Url, RecogNextPage);
                 }
             }
             catch (Exception ex)
@@ -43,7 +42,7 @@ namespace Thrinax.Parser
             return null;
         }
 
-        public bool ParseItem(string Html, string Pattern, string Url, ref Article BaseArticle)
+        public static bool ParseItem(string Html, string Pattern, string Url, ref Article BaseArticle)
         {
             throw new NotImplementedException();
         }

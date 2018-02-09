@@ -26,7 +26,7 @@
     <PackageReference Include="AngleSharp" Version="0.9.9.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.6.15" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.6.16" />
   </ItemGroup>
 
   <ItemGroup>
