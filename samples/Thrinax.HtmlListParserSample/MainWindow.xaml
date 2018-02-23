@@ -12,16 +12,17 @@
                 <DataGridTextColumn Header="Title" Binding="{Binding Title}" ClipboardContentBinding="{Binding Title}" IsReadOnly="True" />
                 <DataGridTextColumn Header="PublishTime" Binding="{Binding PubDate, StringFormat=yyyy-MM-dd HH:mm:ss}" ClipboardContentBinding="{Binding PubDate}" IsReadOnly="True" />
                 <DataGridTextColumn Header="Author" Binding="{Binding Author}" ClipboardContentBinding="{Binding Author}" IsReadOnly="True" />
+                <DataGridTextColumn Header="Url" Binding="{Binding Url}" ClipboardContentBinding="{Binding Url}" IsReadOnly="True" />
             </DataGrid.Columns>
         </DataGrid>
         <Button x:Name="btnRight" Content="Right" Click="btnRight_Click" Margin="0,0,245,18" VerticalContentAlignment="Center" Background="#FF259B0B" BorderBrush="#FFEDF0EC" Foreground="#FFF9F7F7" FontWeight="Bold" FontSize="16" Height="42" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="110" HorizontalContentAlignment="Center"/>
         <Button x:Name="btnWrong" Content="Wrong" Click="btnWrong_Click" Margin="0,0,53,18" Height="42" VerticalContentAlignment="Center" VerticalAlignment="Bottom" BorderBrush="#FFFF3F74" Background="#FFF91111" Foreground="White" FontSize="16" FontWeight="Bold" HorizontalAlignment="Right" Width="110" HorizontalContentAlignment="Center"/>
-        <Label Content="Title" Margin="0,0,371,181" HorizontalAlignment="Right" Width="34" Height="26" VerticalAlignment="Bottom"/>
-        <ComboBox x:Name="cmbTitleXpath" IsEnabled="False" HorizontalAlignment="Right" Margin="0,0,23,185" VerticalAlignment="Bottom" Width="332"/>
-        <Label Content="Time" HorizontalAlignment="Right" Margin="0,0,371,136" VerticalAlignment="Bottom"/>
-        <ComboBox x:Name="cmbTimeXpath" SelectionChanged="cmbTime_SelectionChanged" HorizontalAlignment="Right" Margin="0,0,23,140" VerticalAlignment="Bottom" Width="332"/>
-        <Label Content="Author" HorizontalAlignment="Right" Margin="0,0,371,87" VerticalAlignment="Bottom"/>
-        <ComboBox x:Name="cmbAuthorXpath" SelectionChanged="cmbAuthor_SelectionChanged" HorizontalAlignment="Right" Margin="0,0,23,91" VerticalAlignment="Bottom" Width="332"/>
+        <Label Content="Title" Margin="0,0,371,154" HorizontalAlignment="Right" Width="34" Height="26" VerticalAlignment="Bottom"/>
+        <ComboBox x:Name="cmbTitleXpath" HorizontalAlignment="Right" Margin="0,0,23,158" SelectionChanged="cmbTitleXpath_SelectionChanged" VerticalAlignment="Bottom" Width="332"/>
+        <Label Content="Time" HorizontalAlignment="Right" Margin="0,0,371,114" VerticalAlignment="Bottom"/>
+        <ComboBox x:Name="cmbTimeXpath" SelectionChanged="cmbTime_SelectionChanged" HorizontalAlignment="Right" Margin="0,0,23,118" VerticalAlignment="Bottom" Width="332"/>
+        <Label Content="Author" HorizontalAlignment="Right" Margin="0,0,371,76" VerticalAlignment="Bottom"/>
+        <ComboBox x:Name="cmbAuthorXpath" SelectionChanged="cmbAuthor_SelectionChanged" HorizontalAlignment="Right" Margin="0,0,23,80" VerticalAlignment="Bottom" Width="332"/>
 
         <RadioButton x:Name="btnModel1" GroupName="btnModel" IsChecked="True" Checked="btnModel_Checked" Content="Model1" Margin="0,0,343,274" Height="27" VerticalAlignment="Bottom" Width="62" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
         <RadioButton x:Name="btnModel2" GroupName="btnModel" Content="Model2" Checked="btnModel_Checked" Margin="0,0,267,274" Height="27" VerticalAlignment="Bottom" Width="62" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
@@ -31,8 +32,11 @@
         <WindowsFormsHost x:Name="geckoFormHost" Margin="10,50,10,320"/>
         <Button x:Name="btn_Parser" Content="Parser" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Width="89" Click="btn_Parser_Click" Height="28"/>
         <Label Content="Url:" HorizontalAlignment="Left" Margin="10,12,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="txt_url" Height="20" Margin="46,15,117,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top"/>
-        <Label Content="Base" Margin="0,0,371,226" HorizontalAlignment="Right" Width="34" Height="26" VerticalAlignment="Bottom"/>
-        <TextBox x:Name="txtBaseXpath" IsEnabled="False" HorizontalAlignment="Right" Margin="0,0,23,226" VerticalAlignment="Bottom" Width="332" Height="22"/>
+        <TextBox x:Name="txt_url" Height="20" Margin="46,15,217,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top"/>
+        <Label Content="Base" Margin="0,0,371,231" HorizontalAlignment="Right" Width="34" Height="26" VerticalAlignment="Bottom"/>
+        <TextBox x:Name="txtBaseXpath" IsEnabled="False" HorizontalAlignment="Right" Margin="0,0,23,231" VerticalAlignment="Bottom" Width="332" Height="22"/>
+        <Label Content="Url" Margin="0,0,373,190" HorizontalAlignment="Right" Width="25" Height="26" VerticalAlignment="Bottom"/>
+        <ComboBox x:Name="cmbUrlXpath" IsEnabled="False" HorizontalAlignment="Right" Margin="0,0,23,194" VerticalAlignment="Bottom" Width="332"/>
+        <CheckBox x:Name="checkUseBrowser" Content="Use Browser" HorizontalAlignment="Right" Margin="0,18,116,0" VerticalAlignment="Top"/>
     </Grid>
 </Window>

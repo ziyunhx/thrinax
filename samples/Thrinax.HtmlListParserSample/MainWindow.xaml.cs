@@ -3,17 +3,8 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Thrinax.Enums;
 using Thrinax.Http;
 using Thrinax.Models;
@@ -82,7 +73,16 @@ namespace Thrinax.HtmlListParserSample
             lastTitleXPath = null;
 
             channelUrl = txt_url.Text;
-            httpResult = HttpHelper.HttpRequest(channelUrl);
+
+            if (checkUseBrowser.IsChecked ?? false)
+            {
+                httpResult = SeleniumHelper.HttpRequest(channelUrl);
+            }
+            else
+            {
+                httpResult = HttpHelper.HttpRequest(channelUrl);
+            }
+
             if (httpResult != null && httpResult.HttpCode == 200)
             {
                 listPagePatterns = SmartParser.Extract_Patterns(channelUrl, httpResult.Content, MediaType.WebNews, Enums.Language.CHINESE);
@@ -125,7 +125,6 @@ namespace Thrinax.HtmlListParserSample
             var contents = XpathParser.ParseList(httpResult.Content, JsonConvert.SerializeObject(selectedPattern.Path), channelUrl);
             selectedPattern.Contents = contents.Articles.ToArray();
             ChangeSelectedXpath();
-
         }
 
         private void cmbAuthor_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -136,6 +135,19 @@ namespace Thrinax.HtmlListParserSample
                 return;
 
             selectedPattern.Path.AuthorXPath = senderCombox.ToString();
+            var contents = XpathParser.ParseList(httpResult.Content, JsonConvert.SerializeObject(selectedPattern.Path), channelUrl);
+            selectedPattern.Contents = contents.Articles.ToArray();
+            ChangeSelectedXpath();
+        }
+
+        private void cmbTitleXpath_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var senderCombox = ((ComboBox)sender).SelectedValue;
+
+            if (iscmbLoading || senderCombox == null || (selectedPattern.Path.TitleXPath != null && selectedPattern.Path.TitleXPath.Equals(senderCombox.ToString())))
+                return;
+
+            selectedPattern.Path.TitleXPath = senderCombox.ToString();
             var contents = XpathParser.ParseList(httpResult.Content, JsonConvert.SerializeObject(selectedPattern.Path), channelUrl);
             selectedPattern.Contents = contents.Articles.ToArray();
             ChangeSelectedXpath();
@@ -205,7 +217,6 @@ namespace Thrinax.HtmlListParserSample
                     btnModel4.IsEnabled = false;
                     btnModel5.IsEnabled = false;
                 }));
-
             }
             else
             {
@@ -252,7 +263,6 @@ namespace Thrinax.HtmlListParserSample
                         }
                         if (!string.IsNullOrEmpty(selectedPattern.Path.DateXPath))
                             cmbTimeXpath.Items.Add("");
-
 
                         cmbAuthorXpath.Items.Add(selectedPattern.Path.AuthorXPath ?? "");
                         //获取备选的作者模式
@@ -373,7 +383,6 @@ namespace Thrinax.HtmlListParserSample
             if (!string.IsNullOrEmpty(selectedPattern.Path.DateXPath))
                 cmbTimeXpath.Items.Add("");
 
-
             cmbAuthorXpath.Items.Add(selectedPattern.Path.AuthorXPath ?? "");
             //获取备选的作者模式
             if (selectedPattern.BackUpPaths.ContainsKey(PatternType.Author))
@@ -409,6 +418,5 @@ namespace Thrinax.HtmlListParserSample
 
             iscmbLoading = false;
         }
-
     }
 }

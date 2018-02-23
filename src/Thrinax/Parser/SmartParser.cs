@@ -129,9 +129,7 @@ namespace Thrinax.Parser
 
             //todo:如果命中了论坛类型，则进入论坛识别
             if (MediaType == Enums.MediaType.Forum)
-            {
-
-            }
+            { }
 
             SoftStrategy Strategy = new SoftStrategy(MediaType, Language);
 
@@ -182,7 +180,6 @@ namespace Thrinax.Parser
             //统计共有多少种不同结构的链接，列出候选者并排序
             List<HtmlPattern> Patterns = List_HtmlPattern_DiscoverPattern(filterHref, RootNode, Strategy, Url, NeedScore);
             if (Patterns == null) return null;
-
 
             //这里是删减部分
             if (NeedScore)
@@ -349,23 +346,6 @@ namespace Thrinax.Parser
             return ReplyPatternAnalies;
         }
 
-        /// <summary>
-        /// 完成之后对ContainList进行描写的部分
-        /// </summary>
-        /// <param name="SiblingPatterns"></param>
-        /// <returns></returns>
-        //public static Dictionary<string, int> formContainList(IEnumerable<PatternAnaly> SiblingPatterns)
-        //{
-        //    Dictionary<string, int> ContainList = new Dictionary<string, int>();
-        //    foreach (PatternAnaly Sibling in SiblingPatterns)
-        //    {
-        //        if (ContainList.ContainsKey(Sibling.node.Name))
-        //            ContainList[Sibling.node.Name] += 1;
-        //        else
-        //            ContainList.Add(Sibling.node.Name, 1);
-        //    }
-        //    return ContainList;
-        //}
         public static Dictionary<string, int> formContainList(HtmlNode Node)
         {
             if (Node == null) return null;
@@ -508,7 +488,8 @@ namespace Thrinax.Parser
                                 useless = false
                             };
                             //从这里把basicpattern的单元向上一级
-                            if (!NewRawAnalies.Contains(newrawAnali)) NewRawAnalies.Add(newrawAnali);
+                            if (!NewRawAnalies.Contains(newrawAnali))
+                                NewRawAnalies.Add(newrawAnali);
                         }
                     }
                 }
@@ -688,7 +669,6 @@ namespace Thrinax.Parser
                 RelPatterns.AddRange(List_HtmlPattern_getRelXPath(SeedNodes, RootNode, AbsPattern, strategy, null, null, BestBaseItemCount, PatternType.Title, false));
             }
 
-
             //去重
             foreach (HtmlPattern hp in RelPatterns)
             {
@@ -716,7 +696,6 @@ namespace Thrinax.Parser
 
             ResultPatterns = ResultPatterns.OrderByDescending(p => p.Score).ThenByDescending(p => p.RelXPathUsingName).ThenBy(p => p.RelXPathLevel).ToList();
 
-
             return ResultPatterns;
         }
 
@@ -735,7 +714,6 @@ namespace Thrinax.Parser
         {
             List<HtmlNode> BaseNodes = RootNode.SelectNodes(LinkPattern.ItemBaseXPath).ToList();
             if (BaseNodes == null) return null;
-
 
             if (string.IsNullOrWhiteSpace(LinkPattern.RelXPath))
             {
@@ -847,8 +825,6 @@ namespace Thrinax.Parser
                         }
                 }
             }
-
-            //打分步骤
 
             //补充一个空值给分
             foreach (PatternType kvp in Scores.Keys)

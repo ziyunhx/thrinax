@@ -182,6 +182,9 @@ namespace Thrinax.Parser
                     else
                         nodecollection = BaseNode.SelectNodes(Path.TitleXPath).Where(n => n.Attributes.Contains("href")).ToList();
 
+                    if (!string.IsNullOrWhiteSpace(Path.TitleXPath))
+                        Path.TitleXPath = Path.UrlXPath;
+
                     singleNodeItemCount = nodecollection?.Count ?? 0;
 
                     if (nodecollection != null && nodecollection.Count() > 0 && nodecollection.Any(n => !string.IsNullOrEmpty(n.Attributes["href"].Value)))
