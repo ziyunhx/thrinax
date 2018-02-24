@@ -9,10 +9,19 @@
     <Grid>
         <DataGrid x:Name="dataGridItems" Margin="10,0,433,10" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single" SelectionUnit="CellOrRowHeader" Height="300" VerticalAlignment="Bottom">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Title" Binding="{Binding Title}" ClipboardContentBinding="{Binding Title}" IsReadOnly="True" />
-                <DataGridTextColumn Header="PublishTime" Binding="{Binding PubDate, StringFormat=yyyy-MM-dd HH:mm:ss}" ClipboardContentBinding="{Binding PubDate}" IsReadOnly="True" />
-                <DataGridTextColumn Header="Author" Binding="{Binding Author}" ClipboardContentBinding="{Binding Author}" IsReadOnly="True" />
-                <DataGridTextColumn Header="Url" Binding="{Binding Url}" ClipboardContentBinding="{Binding Url}" IsReadOnly="True" />
+                <DataGridTemplateColumn Header="Title" MinWidth="250" Width="400">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock VerticalAlignment="Center" TextTrimming="CharacterEllipsis">
+                                <Hyperlink x:Name="OpenUrl" NavigateUri="{Binding Url}" Click="OpenUrl_Click" >                                    
+                                    <Run Text="{Binding Title}"/>
+                                </Hyperlink>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="PublishTime" Binding="{Binding PubDate, StringFormat=yyyy-MM-dd HH:mm:ss}" ClipboardContentBinding="{Binding PubDate}" IsReadOnly="True" Width="120" />
+                <DataGridTextColumn Header="Author" Binding="{Binding Author}" ClipboardContentBinding="{Binding Author}" IsReadOnly="True" Width="150" />
             </DataGrid.Columns>
         </DataGrid>
         <Button x:Name="btnRight" Content="Right" Click="btnRight_Click" Margin="0,0,245,18" VerticalContentAlignment="Center" Background="#FF259B0B" BorderBrush="#FFEDF0EC" Foreground="#FFF9F7F7" FontWeight="Bold" FontSize="16" Height="42" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="110" HorizontalContentAlignment="Center"/>
@@ -29,7 +38,7 @@
         <RadioButton x:Name="btnModel3" GroupName="btnModel" Content="Model3" Checked="btnModel_Checked" Margin="0,0,187,274" Height="27" VerticalAlignment="Bottom" Width="62" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" RenderTransformOrigin="0.548,0.963"/>
         <RadioButton x:Name="btnModel4" GroupName="btnModel" Content="Model4" Checked="btnModel_Checked" Margin="0,0,102,274" Height="27" VerticalAlignment="Bottom" Width="62" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
         <RadioButton x:Name="btnModel5" GroupName="btnModel" Content="Model5" Checked="btnModel_Checked" Margin="0,0,23,274" Height="27" VerticalAlignment="Bottom" Width="62" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-        <WindowsFormsHost x:Name="geckoFormHost" Margin="10,50,10,320"/>
+        <WindowsFormsHost x:Name="geckoFormHost" Background="Gray" Margin="10,50,10,320"/>
         <Button x:Name="btn_Parser" Content="Parser" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Width="89" Click="btn_Parser_Click" Height="28"/>
         <Label Content="Url:" HorizontalAlignment="Left" Margin="10,12,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="txt_url" Height="20" Margin="46,15,217,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top"/>

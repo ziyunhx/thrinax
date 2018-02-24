@@ -121,6 +121,9 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <Content Include="output\readme.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SVMmodel\model_rel_WebNews">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

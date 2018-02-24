@@ -2,9 +2,11 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using Thrinax.Enums;
 using Thrinax.Http;
 using Thrinax.Models;
@@ -155,12 +157,20 @@ namespace Thrinax.HtmlListParserSample
 
         private void btnRight_Click(object sender, RoutedEventArgs e)
         {
+            string successPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output", "success.txt");
 
+            File.AppendAllText(successPath, JsonConvert.SerializeObject(new KeyValuePair<string, ListPagePattern>(channelUrl, selectedPattern)) + Environment.NewLine);
+
+            MessageBox.Show("Finish!");
         }
 
         private void btnWrong_Click(object sender, RoutedEventArgs e)
         {
+            string failPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output", "fail.txt");
 
+            File.AppendAllText(failPath, channelUrl + Environment.NewLine);
+
+            MessageBox.Show("Finish!");
         }
 
         private void GeckoWebBrowser_CreateWindow(object sender, GeckoCreateWindowEventArgs e)
@@ -196,10 +206,12 @@ namespace Thrinax.HtmlListParserSample
 
                     //清除表格和下拉框样式与数据
                     dataGridItems.IsEnabled = false;
+                    cmbUrlXpath.IsEnabled = false;
                     cmbTitleXpath.IsEnabled = false;
                     cmbTimeXpath.IsEnabled = false;
                     cmbAuthorXpath.IsEnabled = false;
 
+                    cmbUrlXpath.Items.Clear();
                     cmbTitleXpath.Items.Clear();
                     cmbTimeXpath.Items.Clear();
                     cmbAuthorXpath.Items.Clear();
@@ -234,6 +246,7 @@ namespace Thrinax.HtmlListParserSample
                     btnRight.IsEnabled = true;
                     btnWrong.IsEnabled = true;
 
+                    cmbUrlXpath.Items.Clear();
                     cmbTitleXpath.Items.Clear();
                     cmbTimeXpath.Items.Clear();
                     cmbAuthorXpath.Items.Clear();
@@ -242,6 +255,7 @@ namespace Thrinax.HtmlListParserSample
                     if (listPagePatterns != null && listPagePatterns.Count > 0)
                     {
                         selectedPattern = listPagePatterns[0];
+                        cmbUrlXpath.Items.Add(selectedPattern.Path.UrlXPath);
                         cmbTitleXpath.Items.Add(selectedPattern.Path.TitleXPath);
 
                         cmbTimeXpath.Items.Add(selectedPattern.Path.DateXPath ?? "");
@@ -284,6 +298,7 @@ namespace Thrinax.HtmlListParserSample
                         if (!string.IsNullOrEmpty(selectedPattern.Path.AuthorXPath))
                             cmbAuthorXpath.Items.Add("");
 
+                        cmbUrlXpath.SelectedIndex = 0;
                         cmbTitleXpath.SelectedIndex = 0;
                         cmbTimeXpath.SelectedIndex = 0;
                         cmbAuthorXpath.SelectedIndex = 0;
@@ -296,7 +311,8 @@ namespace Thrinax.HtmlListParserSample
 
                     //启用表格和下拉框
                     dataGridItems.IsEnabled = true;
-                    cmbTitleXpath.IsEnabled = false;
+                    cmbUrlXpath.IsEnabled = false;
+                    cmbTitleXpath.IsEnabled = true;
                     cmbTimeXpath.IsEnabled = true;
                     cmbAuthorXpath.IsEnabled = true;
 
@@ -352,14 +368,17 @@ namespace Thrinax.HtmlListParserSample
             btnRight.IsEnabled = false;
             btnWrong.IsEnabled = false;
 
+            cmbUrlXpath.IsEnabled = false;
             cmbTitleXpath.IsEnabled = false;
             cmbTimeXpath.IsEnabled = false;
             cmbAuthorXpath.IsEnabled = false;
 
+            cmbUrlXpath.Items.Clear();
             cmbTitleXpath.Items.Clear();
             cmbTimeXpath.Items.Clear();
             cmbAuthorXpath.Items.Clear();
 
+            cmbUrlXpath.Items.Add(selectedPattern.Path.UrlXPath);
             //在 listPatterns 不为 null 的情况下绑定第一个模式的数据
             cmbTitleXpath.Items.Add(selectedPattern.Path.TitleXPath);
 
@@ -403,20 +422,30 @@ namespace Thrinax.HtmlListParserSample
             if (!string.IsNullOrEmpty(selectedPattern.Path.AuthorXPath))
                 cmbAuthorXpath.Items.Add("");
 
+            cmbUrlXpath.SelectedIndex = 0;
             cmbTitleXpath.SelectedIndex = 0;
             cmbTimeXpath.SelectedIndex = 0;
             cmbAuthorXpath.SelectedIndex = 0;
 
+            var contents = XpathParser.ParseList(httpResult.Content, JsonConvert.SerializeObject(selectedPattern.Path), channelUrl);
             //绑定出事DataGrid
-            dataGridItems.ItemsSource = selectedPattern.Contents;
+            dataGridItems.ItemsSource = contents.Articles;
 
             btnRight.IsEnabled = true;
             btnWrong.IsEnabled = true;
 
+            cmbTitleXpath.IsEnabled = true;
             cmbTimeXpath.IsEnabled = true;
             cmbAuthorXpath.IsEnabled = true;
 
             iscmbLoading = false;
+        }
+
+        private void OpenUrl_Click(object sender, RoutedEventArgs e)
+        {
+            Hyperlink hyperlink = sender as Hyperlink;
+            Uri uri = hyperlink.NavigateUri;
+            System.Diagnostics.Process.Start("explorer.exe", uri.AbsoluteUri);
         }
     }
 }

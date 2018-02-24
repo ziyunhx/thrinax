@@ -133,7 +133,7 @@ namespace Thrinax.Parser
 
             SoftStrategy Strategy = new SoftStrategy(MediaType, Language);
 
-            //提取候选标题的Pattern
+            //提取候选Url的Pattern
             List<HtmlPattern> LinkPatterns = List_LinkPattern_getCandidateByATag(Url, rootNode, MediaType, Language, Strategy, NeedScore);
             if (LinkPatterns == null || LinkPatterns.Count == 0) return null;
 
