@@ -23,7 +23,7 @@ How to use?
 
 You can get the demo from [Thrinax.HtmlListParserSample](https://github.com/ziyunhx/thrinax/tree/master/samples/Thrinax.HtmlListParserSample).
 
- ![Image](https://www.tnidea.com/media/image/thrinax-2-01.png)
+ ![list](https://www.tnidea.com/media/image/thrinax-2-01.png)
 
  ## Parser a content webpage
 
@@ -33,7 +33,7 @@ How to use?
 
 You can get the demo from [Thrinax.ExtractArticleSample](https://github.com/ziyunhx/thrinax/tree/master/samples/Thrinax.ExtractArticleSample).
 
-![Image](https://www.tnidea.com/media/image/thrinax-1-01.png)
+![content](https://www.tnidea.com/media/image/thrinax-1-01.png)
 
 ## License
 
