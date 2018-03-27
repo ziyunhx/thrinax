@@ -3,12 +3,10 @@
 A lib which is used of Chinese unstructured text capture.
 
 ## Download
--------
 
     PM> Install-Package Thrinax
 
 ## Parser a list webpage
--------
 
 How to use?
 
@@ -28,7 +26,6 @@ You can get the demo from [Thrinax.HtmlListParserSample](https://github.com/ziyu
  ![Image](https://www.tnidea.com/media/image/thrinax-2-01.png)
 
  ## Parser a content webpage
- -------
 
 How to use?
 
@@ -38,8 +35,7 @@ You can get the demo from [Thrinax.ExtractArticleSample](https://github.com/ziyu
 
 ![Image](https://www.tnidea.com/media/image/thrinax-1-01.png)
 
-License
--------
+## License
 
 The Apache License 2.0 applies to all samples in this repository.
 
