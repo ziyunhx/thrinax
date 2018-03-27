@@ -33,7 +33,7 @@ How to use?
 
 You can get the demo from [Thrinax.ExtractArticleSample](https://github.com/ziyunhx/thrinax/tree/master/samples/Thrinax.ExtractArticleSample).
 
-![content](https://www.tnidea.com/media/image/thrinax-1-03.png)
+![content](https://www.tnidea.com/media/image/thrinax-1-02.png)
 
 ## License
 
