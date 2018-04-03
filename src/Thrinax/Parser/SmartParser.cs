@@ -3292,7 +3292,7 @@ namespace Thrinax.Parser
             string Content = string.Empty;
             foreach (HtmlNode cnode in nodes)
             {
-                string temp = HtmlFormattor.FormatHtml(cnode.InnerHtml, Url);
+                string temp = HtmlFormatter.FormatHtml(cnode.InnerHtml, Url);
                 temp = CleanContent_CleanEditor(temp);
                 temp = CleanContent_CleanA(temp);
                 if (!Format) temp = TextCleaner.FullClean(temp);
@@ -3305,7 +3305,7 @@ namespace Thrinax.Parser
             string Content = string.Empty;
             foreach (HtmlNode cnode in nodes)
             {
-                string temp = HtmlFormattor.FormatHtml(cnode.InnerHtml, Url);
+                string temp = HtmlFormatter.FormatHtml(cnode.InnerHtml, Url);
                 Content += temp;
             }
             return Content;

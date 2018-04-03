@@ -8,7 +8,7 @@ namespace Thrinax.Utility
     /// <summary>
     /// 对Html进行格式重整
     /// </summary>
-    public class HtmlFormattor
+    public class HtmlFormatter
     {
         #region 配置项
 
@@ -68,7 +68,7 @@ namespace Thrinax.Utility
             if (oriHtmlNode == null || string.IsNullOrWhiteSpace(oriHtmlNode.InnerText))
                 return OriHtml;
 
-            oriHtmlNode = oriHtmlNode.SelectSingleNode("//body");
+            oriHtmlNode = oriHtmlNode.SelectSingleNode("//body") ?? oriHtmlNode;
 
             #endregion 加载Doc对象
 
@@ -81,7 +81,7 @@ namespace Thrinax.Utility
                     try
                     {
                         //清理无内容的P
-                        if (string.IsNullOrEmpty(TextCleaner.FullClean(node.InnerHtml, false)))
+                        if (string.IsNullOrEmpty(TextCleaner.FullClean(node.InnerHtml, false, false)))
                         {
                             //可能是为了空一行.
                             node.RemoveAll();

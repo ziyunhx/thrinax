@@ -48,7 +48,7 @@ namespace Thrinax
 
             if (article != null && !string.IsNullOrWhiteSpace(article.HtmlContent))
             {
-                article.HtmlContent = HtmlFormattor.FormatHtml(article.HtmlContent, url);
+                article.HtmlContent = HtmlFormatter.FormatHtml(article.HtmlContent, url);
             }
 
             return article;

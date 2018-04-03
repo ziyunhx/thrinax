@@ -77,7 +77,7 @@ namespace Thrinax.Utility
             string Content = string.Empty;
             foreach (HtmlNode cnode in nodes)
             {
-                string temp = HtmlFormattor.FormatHtml(cnode.InnerHtml, Url);
+                string temp = HtmlFormatter.FormatHtml(cnode.InnerHtml, Url);
                 temp = CleanContent_CleanEditor(temp);
                 temp = CleanContent_CleanA(temp);
                 if (!Format) temp = TextCleaner.FullClean(temp);
@@ -90,7 +90,7 @@ namespace Thrinax.Utility
             string Content = string.Empty;
             foreach (HtmlNode cnode in nodes)
             {
-                string temp = HtmlFormattor.FormatHtml(cnode.InnerHtml, Url);
+                string temp = HtmlFormatter.FormatHtml(cnode.InnerHtml, Url);
                 Content += temp;
             }
             return Content;
@@ -233,7 +233,7 @@ namespace Thrinax.Utility
             //去掉\n \t \r &nbsp; 合并连续的空格
             HTML = nRegex.Replace(HTML,"");
             HTML = trimRegex.Replace(HTML, " ");
-            HTML = wRegex.Replace(HTML,  " ");
+            //HTML = wRegex.Replace(HTML,  " ");
             HTML = sRegex.Replace(HTML, " ");
             HTML = zRegex.Replace(HTML, ">");
 
@@ -241,7 +241,7 @@ namespace Thrinax.Utility
         }
         private static Regex nRegex = new Regex(@"\n", RegexOptions.Compiled);
         private static Regex trimRegex = new Regex(@"\t|\r|&nbsp;|&nbsp", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private static Regex wRegex = new Regex(@"&\w+;", RegexOptions.Compiled);
+        //private static Regex wRegex = new Regex(@"&\w+;", RegexOptions.Compiled);
         private static Regex sRegex = new Regex(@"\s+", RegexOptions.Compiled);
         private static Regex zRegex = new Regex(@"\s+>", RegexOptions.Compiled);
         private static Regex nbspRegex = new Regex(@"&nbsp;", RegexOptions.Compiled);

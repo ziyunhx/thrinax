@@ -357,116 +357,70 @@ namespace Thrinax.Utility
         }
 
         /// <summary>
-        /// 获取 Html 节点（有些网站直接从head开始写，脑残）
+        /// 获取安全的HtmlNode
         /// </summary>
-        /// <param name="HTML"></param>
-        /// <param name="TryFixHTML">是否修正Html</param>
+        /// <param name="HTML">原文Html</param>
+        /// <param name="ignoreEx">是否忽略错误</param>
+        /// <param name="TryFixHTML">是否尝试修复网页</param>
         /// <returns></returns>
-        public static HtmlNode getSafeHtmlRootNode(string HTML, bool TryFixHTML = true)
+        public static HtmlNode getSafeHtmlRootNode(string HTML, bool ignoreEx = true, bool TryFixHTML = true)
         {
             HtmlDocument doc = new HtmlDocument();
 
             string _html = HTML;
 
-            //We require a custom configuration
-            var config = Configuration.Default;
-            //Let's create a new parser using this configuration
-            var parser = new HtmlParser(config);
-
-            IDocument document = null;
-
-            if (TryFixHTML)
-            {
-                try
-                {
-                    //加载DOM, 修正Html
-                    document = parser.Parse(HTML);
-
-                    if (document != null && !string.IsNullOrEmpty(document.DocumentElement.OuterHtml))
-                        _html = document.DocumentElement.OuterHtml;
-                }
-                catch { }
-            }
-
+            bool needTryFixHtml = false;
             try
             {
                 doc.LoadHtml(_html);
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-
-            //获取root节点（有些网站页面不带html标签的，直接从head开始写）
-            HtmlNode rootNode = null;
-            try
-            {
-                rootNode = doc.DocumentNode.SelectSingleNode("//html");
-                if (rootNode == null)
-                    rootNode = doc.DocumentNode;
+                if (doc == null || doc.DocumentNode == null || string.IsNullOrWhiteSpace(doc.DocumentNode.OuterHtml)
+                    || (HTML.Length * 0.85 > doc.DocumentNode.OuterHtml.Length))
+                    needTryFixHtml = true;
             }
             catch
             {
-                rootNode = doc.DocumentNode;
+                needTryFixHtml = true;
             }
 
-            return rootNode;
-        }
-
-        /// <summary>
-        /// 获取安全的HtmlNode，放弃原有的HtmlValidator
-        /// </summary>
-        /// <param name="HTML"></param>
-        /// <param name="ignoreEx"></param>
-        /// <param name="TryFixHTML"></param>
-        /// <returns></returns>
-        public static HtmlNode getSafeHtmlRootNode(string HTML, bool ignoreEx, bool TryFixHTML = true)
-        {
-            HtmlDocument doc = new HtmlDocument();
-
-            string _html = HTML;
-
-            //We require a custom configuration
-            var config = Configuration.Default;
-            //Let's create a new parser using this configuration
-            var parser = new HtmlParser(config);
-
-            IDocument document = null;
-
-            if (TryFixHTML)
+            if (needTryFixHtml)
             {
-                try
+                if (TryFixHTML)
                 {
-                    //加载DOM, 修正Html
-                    document = parser.Parse(HTML);
+                    //We require a custom configuration
+                    var config = Configuration.Default;
+                    //Let's create a new parser using this configuration
+                    var parser = new HtmlParser(config);
 
-                    if (document != null && !string.IsNullOrEmpty(document.DocumentElement.OuterHtml))
-                        _html = document.DocumentElement.OuterHtml;
-                }
-                catch { }
-            }
+                    IDocument document = null;
+                    try
+                    {
+                        //加载DOM, 修正Html
+                        document = parser.Parse(HTML);
 
-            try
-            {
-                doc.LoadHtml(_html);
-            }
-            catch (Exception ex)
-            {
-                if (ignoreEx)
-                {
-                    return null;
+                        if (document != null && !string.IsNullOrEmpty(document.DocumentElement.OuterHtml))
+                        {
+                            _html = document.DocumentElement.OuterHtml;
+                            doc.LoadHtml(_html);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ignoreEx)
+                        {
+                            if (doc == null || doc.DocumentNode == null)
+                                return null;
+                        }
+                        else
+                            throw ex;
+                    }
                 }
-                else
-                    throw ex;
             }
 
             //获取root节点（有些网站页面不带html标签的，直接从head开始写）
             HtmlNode rootNode = null;
             try
             {
-                rootNode = doc.DocumentNode.SelectSingleNode("//html");
-                if (rootNode == null)
-                    rootNode = doc.DocumentNode;
+                rootNode = doc.DocumentNode.SelectSingleNode("//html") ?? doc.DocumentNode;
             }
             catch
             {

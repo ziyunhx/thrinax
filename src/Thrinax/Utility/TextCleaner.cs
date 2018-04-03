@@ -21,15 +21,20 @@ namespace Thrinax.Utility
 
             string Cleaned = cleanComment ? Regex.Replace(DirtyText, @"<!--[\s\S]*?-->", String.Empty) : DirtyText;
             Cleaned = CleanHtml ? HTMLCleaner.CleanHTML(Cleaned, CleanImg) : Cleaned;
-            if (string.IsNullOrEmpty(Cleaned)) return "";
+            if (string.IsNullOrEmpty(Cleaned))
+                return "";
 
-            if (CleanUBB) Cleaned = TextCleaner.CleanUBB(Cleaned);
+            if (CleanUBB)
+                Cleaned = TextCleaner.CleanUBB(Cleaned);
+
             Cleaned = CleanNonsense(Cleaned, RemainConnectionMark);
             Cleaned = CleanRepetition(Cleaned);
             if (string.IsNullOrEmpty(Cleaned)) return "";
 
-            if (CleanHtml && !RemainURLEmail) Cleaned = CleanURL(Cleaned);
-            if (CleanHtml && !RemainURLEmail) Cleaned = CleanEmail(Cleaned);
+            if (CleanHtml)
+                Cleaned = CleanURL(Cleaned);
+            if (!RemainURLEmail)
+                Cleaned = CleanEmail(Cleaned);
             Cleaned = CnChar2EnChar(Cleaned);
             if (IsTraditionalChinese(Cleaned))
             {
