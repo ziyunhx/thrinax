@@ -2,25 +2,25 @@
   <PropertyGroup>
 	<TargetFrameworks Condition="'$(LibraryFrameworks)'==''">net45;net452;netstandard2.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(LibraryFrameworks)'!=''">$(LibraryFrameworks)</TargetFrameworks>
-    <Description>A csharp crawler lib.</Description>
+    <Description>A lib which is used of Chinese unstructured text capture.</Description>
     <AssemblyTitle>Thrinax</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
     <VersionPrefix>1.0.2</VersionPrefix>
     <Authors>Carey Tzou</Authors>
     <Company>Taikor</Company>
-    <Copyright>Copyright © Taikor 2005-2018</Copyright>
+    <Copyright>Copyright © GiMind 2005-2018</Copyright>
     <AssemblyName>Thrinax</AssemblyName>
     <PackageId>Thrinax</PackageId>
-    <PackageTags>Thrinax;Crawler;Crawl</PackageTags>
+    <PackageTags>Thrinax;Crawler;Crawl,textcapture</PackageTags>
     <PackageReleaseNotes></PackageReleaseNotes>
     <PackageProjectUrl>http://www.tnidea.com/categories/Thrinax/</PackageProjectUrl>
     <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
     <SignAssembly>true</SignAssembly>
     <RepositoryUrl>https://github.com/ziyunhx/thrinax</RepositoryUrl>
-    <FileVersion>1.0.5.1430</FileVersion>
+    <FileVersion>1.0.6.1724</FileVersion>
     <DelaySign>false</DelaySign>
   </PropertyGroup>
 
