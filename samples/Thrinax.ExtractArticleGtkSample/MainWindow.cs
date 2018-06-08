@@ -36,7 +36,7 @@ public partial class MainWindow : Gtk.Window
 
                 if (!string.IsNullOrWhiteSpace(article.HtmlContent))
                 {
-                    string htmlText = HtmlFormattor.FormatHtml(article.HtmlContent, currentUrl);
+                    string htmlText = HtmlFormatter.FormatHtml(article.HtmlContent, currentUrl);
                     txtContent.Buffer.Text = htmlText;
                 }
             }
