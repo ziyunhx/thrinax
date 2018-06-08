@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Remote;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -27,7 +28,7 @@ namespace Thrinax.Http
         /// <summary>
         /// 实际的浏览器实例
         /// </summary>
-        public IWebDriver client { set; get; }
+        public RemoteWebDriver client { set; get; }
         /// <summary>
         /// 超时时间
         /// </summary>
