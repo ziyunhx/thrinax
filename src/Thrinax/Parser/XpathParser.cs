@@ -307,9 +307,10 @@ namespace Thrinax.Parser
         /// <returns></returns>
         internal static string ExtractInnerTextFromBaseNode(HtmlNode BaseNode, string RelXPath, int postion, bool CleanConnectionMark = true)
         {
-            if (BaseNode == null) return null;
+            if (BaseNode == null)
+                return null;
 
-            if (string.IsNullOrWhiteSpace(RelXPath) && postion == 0)
+            if (string.IsNullOrWhiteSpace(RelXPath))
             {
                 if (CleanConnectionMark)
                     return TextCleaner.FullClean(XPathUtility.InnerTextNonDescendants(BaseNode));
@@ -317,16 +318,32 @@ namespace Thrinax.Parser
                     return TextCleaner.FullClean(XPathUtility.InnerTextNonDescendants(BaseNode), true, true, true, false, true, false);
             }
 
-            IEnumerable<HtmlNode> MatchNodes = BaseNode.SelectNodes(RelXPath);
-            if (MatchNodes != null)
-                MatchNodes = MatchNodes.Where(n => !string.IsNullOrEmpty(XPathUtility.InnerTextNonDescendants(n)));
-            if (!string.IsNullOrWhiteSpace(RelXPath) && (MatchNodes == null || MatchNodes.Count() <= postion))
-                return null;
+            string innerTextValue = "";
+
+            try
+            {
+                HtmlNodeNavigator navigator = (HtmlNodeNavigator)BaseNode.CreateNavigator();
+                var node = navigator.SelectSingleNode(RelXPath);
+                innerTextValue = node.Value;
+            }
+            catch (Exception ex)
+            { }
+
+            if (string.IsNullOrWhiteSpace(innerTextValue))
+            {
+                IEnumerable<HtmlNode> MatchNodes = BaseNode.SelectNodes(RelXPath);
+                if (MatchNodes != null)
+                    MatchNodes = MatchNodes.Where(n => !string.IsNullOrEmpty(XPathUtility.InnerTextNonDescendants(n)));
+                if (!string.IsNullOrWhiteSpace(RelXPath) && (MatchNodes == null || MatchNodes.Count() == 0))
+                    return null;
+
+                innerTextValue = XPathUtility.InnerTextNonDescendants(MatchNodes.First());
+            }
 
             if (CleanConnectionMark)
-                return TextCleaner.FullClean(XPathUtility.InnerTextNonDescendants(MatchNodes.ElementAt(postion)));
+                return TextCleaner.FullClean(innerTextValue);
             else
-                return TextCleaner.FullClean(XPathUtility.InnerTextNonDescendants(MatchNodes.ElementAt(postion)), true, true, true, false, true, false);
+                return TextCleaner.FullClean(innerTextValue, true, true, true, false, true, false);
         }
 
         internal const string AuthorPrefixRegex = @"作\s*者|选\s*稿|编\s*辑|记\s*者|作\s*家";
