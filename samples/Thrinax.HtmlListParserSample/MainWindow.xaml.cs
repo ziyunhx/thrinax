@@ -1,4 +1,5 @@
 ﻿using Gecko;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ using Thrinax.Enums;
 using Thrinax.Http;
 using Thrinax.Models;
 using Thrinax.Parser;
+using Thrinax.Utility;
 using Thrinax.Utility.Smart;
 
 namespace Thrinax.HtmlListParserSample
@@ -446,6 +448,50 @@ namespace Thrinax.HtmlListParserSample
             Hyperlink hyperlink = sender as Hyperlink;
             Uri uri = hyperlink.NavigateUri;
             System.Diagnostics.Process.Start("explorer.exe", uri.AbsoluteUri);
+        }
+
+        private void btnOutPut_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var saveFileDialog1 = new SaveFileDialog
+                {
+                    Filter = "Excel|*.xlsx|Excel 2003|*.xls",
+                    Title = "Save File"
+                };
+                saveFileDialog1.ShowDialog();
+
+                if (string.IsNullOrEmpty(saveFileDialog1.FileName))
+                    return;
+
+                if (selectedPattern != null && selectedPattern.Path != null)
+                {
+                    var contents = XpathParser.ParseList(httpResult.Content, JsonConvert.SerializeObject(selectedPattern.Path), channelUrl);
+
+                    List<Article> articles = new List<Article>();
+                    foreach (var article in contents.Articles)
+                    {
+                        if (!string.IsNullOrWhiteSpace(article.Author) && article.Author.Contains(" "))
+                            article.Author = article.Author.Split(' ')[0];
+                        //Article _article = ThrinaxHelper.GetArticleAndFormatter(article.Url);
+                        //article.Content = _article.Content;
+                        //article.HtmlContent = _article.HtmlContent;
+                        //if (article.PubDate == null || article.PubDate <= DateTime.Parse("1970-01-01"))
+                        //{
+                        //    article.PubDate = _article.PubDate;
+                        //}
+                        articles.Add(article);
+                    }
+
+                    ExcelHelper.SaveExcelSheet(articles, saveFileDialog1.FileName, "Thrinax");
+                }
+            }
+            catch (Exception ex)
+            {
+                //log the err.
+            }
+
+            MessageBox.Show("Finish");
         }
     }
 }

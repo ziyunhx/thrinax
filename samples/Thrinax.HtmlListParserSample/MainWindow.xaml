@@ -33,10 +33,10 @@
         <Label Content="Author" HorizontalAlignment="Right" Margin="0,0,371,76" VerticalAlignment="Bottom"/>
         <ComboBox x:Name="cmbAuthorXpath" SelectionChanged="cmbAuthor_SelectionChanged" HorizontalAlignment="Right" Margin="0,0,23,80" VerticalAlignment="Bottom" Width="332"/>
 
-        <RadioButton x:Name="btnModel1" GroupName="btnModel" IsChecked="True" Checked="btnModel_Checked" Content="Model1" Margin="0,0,343,274" Height="27" VerticalAlignment="Bottom" Width="62" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-        <RadioButton x:Name="btnModel2" GroupName="btnModel" Content="Model2" Checked="btnModel_Checked" Margin="0,0,267,274" Height="27" VerticalAlignment="Bottom" Width="62" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-        <RadioButton x:Name="btnModel3" GroupName="btnModel" Content="Model3" Checked="btnModel_Checked" Margin="0,0,187,274" Height="27" VerticalAlignment="Bottom" Width="62" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" RenderTransformOrigin="0.548,0.963"/>
-        <RadioButton x:Name="btnModel4" GroupName="btnModel" Content="Model4" Checked="btnModel_Checked" Margin="0,0,102,274" Height="27" VerticalAlignment="Bottom" Width="62" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <RadioButton x:Name="btnModel1" GroupName="btnModel" IsChecked="True" Checked="btnModel_Checked" Content="Model1" Margin="0,0,283,274" Height="27" VerticalAlignment="Bottom" Width="62" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <RadioButton x:Name="btnModel2" GroupName="btnModel" Content="Model2" Checked="btnModel_Checked" Margin="0,0,217,274" Height="27" VerticalAlignment="Bottom" Width="62" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <RadioButton x:Name="btnModel3" GroupName="btnModel" Content="Model3" Checked="btnModel_Checked" Margin="0,0,153,274" Height="27" VerticalAlignment="Bottom" Width="62" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" RenderTransformOrigin="0.548,0.963"/>
+        <RadioButton x:Name="btnModel4" GroupName="btnModel" Content="Model4" Checked="btnModel_Checked" Margin="0,0,87,274" Height="27" VerticalAlignment="Bottom" Width="62" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
         <RadioButton x:Name="btnModel5" GroupName="btnModel" Content="Model5" Checked="btnModel_Checked" Margin="0,0,23,274" Height="27" VerticalAlignment="Bottom" Width="62" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
         <WindowsFormsHost x:Name="geckoFormHost" Background="Gray" Margin="10,50,10,320"/>
         <Button x:Name="btn_Parser" Content="Parser" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Width="89" Click="btn_Parser_Click" Height="28"/>
@@ -47,5 +47,6 @@
         <Label Content="Url" Margin="0,0,373,190" HorizontalAlignment="Right" Width="25" Height="26" VerticalAlignment="Bottom"/>
         <ComboBox x:Name="cmbUrlXpath" IsEnabled="False" HorizontalAlignment="Right" Margin="0,0,23,194" VerticalAlignment="Bottom" Width="332"/>
         <CheckBox x:Name="checkUseBrowser" Content="Use Browser" HorizontalAlignment="Right" Margin="0,18,116,0" VerticalAlignment="Top"/>
+        <Button x:Name="btnOutPut" Content="OutPut" HorizontalAlignment="Right" Margin="0,0,371,279" VerticalAlignment="Bottom" Width="54" Height="25" Click="btnOutPut_Click"/>
     </Grid>
 </Window>

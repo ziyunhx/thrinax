@@ -139,7 +139,7 @@ namespace Thrinax.Http
         /// </summary>
         /// <param name="baseUrl">Base Url</param>
         /// <param name="timeout">time out ticks</param>
-        public HttpWebClient(string baseUrl = "", long timeout = 30000)
+        public HttpWebClient(string baseUrl, long timeout = 30000)
         {
             handler = new HttpClientHandler()
             {
@@ -151,6 +151,25 @@ namespace Thrinax.Http
             http = new HttpClient(handler)
             {
                 BaseAddress = new Uri(baseUrl),
+                Timeout = new TimeSpan(timeout)
+            };
+        }
+
+        /// <summary>
+        /// Init method
+        /// </summary>
+        /// <param name="timeout">time out ticks</param>
+        public HttpWebClient(long timeout = 30000)
+        {
+            handler = new HttpClientHandler()
+            {
+                CookieContainer = new CookieContainer(),
+                UseCookies = true,
+                AutomaticDecompression = DecompressionMethods.GZip
+            };
+
+            http = new HttpClient(handler)
+            {
                 Timeout = new TimeSpan(timeout)
             };
         }

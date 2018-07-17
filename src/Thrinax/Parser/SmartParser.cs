@@ -598,7 +598,7 @@ namespace Thrinax.Parser
                         NewtrueAnali.LeastAncestorNode = Anali.CurrentNode.ParentNode;
                         NewtrueAnali.LeastAncestorXPath = Anali.CurrentNode.ParentNode.XPath;
                     }
-                    if (Anali.CurrentNode.XPath.EndsWith("]") && Siblings.Count > 1)
+                    if (Anali.CurrentNode.XPath.EndsWith("]") && Siblings.Count > 1 && NewtrueAnali.BasicXPath.StartsWith(Anali.CurrentNode.XPath) && NewtrueAnali.BasicXPath.Length > Anali.CurrentNode.XPath.Length)
                     {
                         string sub = NewtrueAnali.BasicXPath.Substring(Anali.CurrentNode.XPath.Length);
                         if (sub.IndexOf("[") == -1 && sub.Contains("]") || sub.IndexOf("[") > sub.IndexOf("]")) sub = "[" + sub;
