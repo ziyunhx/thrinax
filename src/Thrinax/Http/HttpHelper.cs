@@ -62,7 +62,7 @@ namespace Thrinax.Http
 
                 //创建流对象并解码
                 Stream ResponseStream;
-                switch (httpWebResponse.ContentEncoding.ToUpperInvariant())
+                switch (httpWebResponse.ContentEncoding?.ToUpperInvariant() ?? "")
                 {
                     case "GZIP":
                         ResponseStream = new GZipStream(
@@ -161,6 +161,18 @@ namespace Thrinax.Http
                         encode = Encoding.Default;
 
                     Content = encode.GetString(bytes.ToArray());
+
+                    //get the Cookies，support httponly.
+                    if (string.IsNullOrEmpty(cookiesDomain))
+                        cookiesDomain = httpWebResponse.ResponseUri?.Host;
+
+                    if (!string.IsNullOrWhiteSpace(cookiesDomain))
+                    {
+                        cookies = new CookieContainer();
+                        CookieCollection httpHeaderCookies = SetCookie(httpWebResponse, cookiesDomain);
+                        cookies.Add(httpHeaderCookies ?? httpWebResponse.Cookies);
+                    }
+
                     ResponseStream.Close();
                 }
                 catch (Exception ex)
@@ -172,14 +184,6 @@ namespace Thrinax.Http
                 {
                     httpWebResponse.Close();
                 }
-
-                //get the Cookies，support httponly.
-                if (string.IsNullOrEmpty(cookiesDomain))
-                    cookiesDomain = httpWebResponse.ResponseUri.Host;
-
-                cookies = new CookieContainer();
-                CookieCollection httpHeaderCookies = SetCookie(httpWebResponse, cookiesDomain);
-                cookies.Add(httpHeaderCookies ?? httpWebResponse.Cookies);
 
                 httpResponse.Content = Content;
             }
