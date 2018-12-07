@@ -1,0 +1,32 @@
+﻿<Window x:Class="ThrinaxModelTrain.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ThrinaxModelTrain"
+        mc:Ignorable="d"
+        Title="Thrinax Model Train" Height="494.417" Width="501.822">
+    <Grid>
+        <TabControl Margin="0,45,0,0">
+            <TabItem Header="列表页训练">
+                <Grid Background="#FFE5E5E5">
+                    <Button Content="加载数据" HorizontalAlignment="Left" Margin="105,343,0,0" VerticalAlignment="Top" Width="75" Height="35" RenderTransformOrigin="0.531,0.927"/>
+                    <Button Content="开始训练" HorizontalAlignment="Left" Margin="297,343,0,0" VerticalAlignment="Top" Width="75" Height="35" RenderTransformOrigin="0.08,0.522"/>
+                    <Label Content="训练数据集目录：" HorizontalAlignment="Left" Margin="10,29,0,0" VerticalAlignment="Top"/>
+                    <TextBox HorizontalAlignment="Left" Height="23" Margin="121,29,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="218" RenderTransformOrigin="0.58,0.562"/>
+                    <Button Content="选择" HorizontalAlignment="Left" Margin="360,29,0,0" VerticalAlignment="Top" Width="93" Height="23"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="列表页测试">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="文章页训练">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="文章页测试">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+        </TabControl>
+        <Label Content="网页模式识别模型训练，默认使用SVM模型，暂不支持其它形式。" HorizontalAlignment="Left" Margin="5,7,0,0" VerticalAlignment="Top"/>
+    </Grid>
+</Window>

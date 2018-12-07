@@ -290,7 +290,7 @@ namespace Thrinax.Extract
                         string innerTextWithoutBlack = Regex.Replace(innerText, @"\s", "");
                         if (!string.IsNullOrWhiteSpace(innerTextWithoutBlack) && innerTextWithoutBlack.Length > 0)
                         {
-                            baseScore += (double)innerTextWithoutBlack.Length / 20;
+                            baseScore += (double)innerTextWithoutBlack.Length / 40;
 
                             HtmlNode _divHtmlNode = null;
                             if (itemNode.HasChildNodes && itemNode.ChildNodes.Count(f => f.Name == "p") > 0)
@@ -327,7 +327,7 @@ namespace Thrinax.Extract
                                     {
                                         innerNode = htmlDocument.DocumentNode;
                                         innerText = newPNodeText;
-                                        baseScore = 15 + newPNodeTextWithoutBlack.Length / 20 + (htmlDocument.DocumentNode.ChildNodes.Count - 1) - aScore;
+                                        baseScore = 15 + newPNodeTextWithoutBlack.Length / 40 + (htmlDocument.DocumentNode.ChildNodes.Count - 1) - aScore;
 
                                         //a标签内的文字与总文字相差小于95%时扣100分
                                         var allANodes = htmlDocument.DocumentNode.SelectNodes("//a");

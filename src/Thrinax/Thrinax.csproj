@@ -29,9 +29,9 @@
     <PackageReference Include="AngleSharp" Version="0.9.10" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.8.5" />
-    <PackageReference Include="Selenium.WebDriver" Version="3.14.0" />
-    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="2.41.0" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.8.9" />
+    <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
+    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="2.43.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
