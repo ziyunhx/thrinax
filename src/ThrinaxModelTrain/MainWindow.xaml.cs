@@ -24,5 +24,20 @@ namespace ThrinaxModelTrain
         {
             InitializeComponent();
         }
+
+        private void btnChoseFile_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnSumbit_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnIgnore_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

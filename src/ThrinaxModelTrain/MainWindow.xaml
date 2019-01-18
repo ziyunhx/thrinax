@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ThrinaxModelTrain"
         mc:Ignorable="d"
-        Title="Thrinax Model Train" Height="494.417" Width="501.822">
+        Title="Thrinax Model Train" Height="600" Width="1024">
     <Grid>
         <TabControl Margin="0,45,0,0">
             <TabItem Header="列表页训练">
@@ -15,10 +15,37 @@
                     <Label Content="训练数据集目录：" HorizontalAlignment="Left" Margin="10,29,0,0" VerticalAlignment="Top"/>
                     <TextBox HorizontalAlignment="Left" Height="23" Margin="121,29,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="218" RenderTransformOrigin="0.58,0.562"/>
                     <Button Content="选择" HorizontalAlignment="Left" Margin="360,29,0,0" VerticalAlignment="Top" Width="93" Height="23"/>
+                    <ComboBox HorizontalAlignment="Left" Margin="121,87,0,0" VerticalAlignment="Top" Width="218"/>
+                    <Label Content="选择模型类型：" HorizontalAlignment="Left" Margin="22,83,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.274,-0.223"/>
                 </Grid>
             </TabItem>
             <TabItem Header="列表页测试">
                 <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="正文页标注">
+                <Grid Background="#FFE5E5E5">
+                    <Label Content="选择需要标记的文章页链接文件：" HorizontalAlignment="Left" Margin="10,17,0,0" VerticalAlignment="Top"/>
+                    <TextBox Name="txtFilePath" HorizontalAlignment="Left" Height="23" Margin="205,19,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="326"/>
+                    <Button Name="btnChoseFile" Content="选择" HorizontalAlignment="Left" Margin="548,20,0,0" VerticalAlignment="Top" Width="75" Height="22" Click="btnChoseFile_Click"/>
+                    <ListView Name="listItems" HorizontalAlignment="Left" Height="421" Margin="19,66,0,0" VerticalAlignment="Top" Width="181">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <WindowsFormsHost HorizontalAlignment="Left" Height="421" Margin="218,66,0,0" VerticalAlignment="Top" Width="405"/>
+                    <TextBlock  HorizontalAlignment="Left" Margin="653,9,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="100" Width="284" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="653,117,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="100" Width="284" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="653,331,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="100" Width="284" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="653,224,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="100" Width="284" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+                    <RadioButton Name="choseText" Content="选择" HorizontalAlignment="Left" Margin="942,55,0,0" VerticalAlignment="Top"/>
+                    <RadioButton Content="选择" HorizontalAlignment="Left" Margin="942,387,0,0" VerticalAlignment="Top"/>
+                    <RadioButton Content="选择" HorizontalAlignment="Left" Margin="942,269,0,0" VerticalAlignment="Top"/>
+                    <RadioButton Content="选择" HorizontalAlignment="Left" Margin="942,168,0,0" VerticalAlignment="Top"/>
+                    <Button Name="btnSumbit" Content="提交选择" HorizontalAlignment="Left" Margin="685,454,0,0" VerticalAlignment="Top" Width="106" Height="33" Background="#FF3CA600" Foreground="White" BorderBrush="#FFCBC8C8" Click="btnSumbit_Click"/>
+                    <Button Name="btnIgnore" Content="找不到合适的项" HorizontalAlignment="Left" Margin="831,454,0,0" VerticalAlignment="Top" Width="106" Height="33" Background="#FFF50000" Foreground="#FFFDFDFD" BorderBrush="#FFCBC8C8" Click="btnIgnore_Click"/>
+                </Grid>
             </TabItem>
             <TabItem Header="文章页训练">
                 <Grid Background="#FFE5E5E5"/>
