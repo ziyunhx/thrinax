@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using technology.tabula;
 using technology.tabula.extractors;
+using technology.tabula.json;
 
 namespace Thrinax.Parser.PDFParser
 {
@@ -24,7 +25,7 @@ namespace Thrinax.Parser.PDFParser
         private static string tableEndMark = "--GIMindTableEnd--";
         private static string structStartMark = "--GIMindStructStart--";
         private static string structEndMark = "--GIMindStructEnd--";
-
+        private static Regex lineRegex = new Regex("\r\n", RegexOptions.Compiled);
         /// <summary>
         /// 通过文件名解析PDF
         /// </summary>
@@ -57,8 +58,11 @@ namespace Thrinax.Parser.PDFParser
             }
             finally
             {
-                reader.close();
-                reader = null;
+                if (reader != null)
+                {
+                    reader.close();
+                    reader = null;
+                }
             }
 
             return fileContent;
@@ -116,11 +120,10 @@ namespace Thrinax.Parser.PDFParser
 
             PDFTextStripper pdfStripper = new PDFTextStripper();
             pdfStripper.setPageEnd(pageEndMark);
-            pdfStripper.setParagraphEnd(paragraphEndMark);
+            //pdfStripper.setParagraphEnd(paragraphEndMark);
             string[] strs = Regex.Split(pdfStripper.getText(pdfDocument), pageEndMark, RegexOptions.IgnoreCase);
             if (strs != null && strs.Length > 0)
-            {
-                
+            {                
                 pdfModel.Pages = new List<PdfPageModel>();
                 int cp = 0;
 
@@ -179,8 +182,8 @@ namespace Thrinax.Parser.PDFParser
                 {
                     PdfPageModel pdfPageModel = pdf.Pages[page - 1];
                     //使用换行符拆分字符串
-                    string[] pageTexts = Regex.Split(pdfPageModel.Text, paragraphEndMark, RegexOptions.IgnoreCase);
-                    List<int> tempCountList = pageTexts.Select(f => f.Replace(" ", "").Replace("  ", "").Length).Where(f => f > 5).ToList();
+                    string[] pageTexts = lineRegex.Split(pdfPageModel.Text);
+                    List<int> tempCountList = pageTexts.Select(f => f.Replace(" ", "").Replace("  ", "").Replace("\r", "").Replace("\n", "").Length).Where(f => f > 15).ToList();
                     if (tempCountList != null && tempCountList.Count > 0)
                         countList.AddRange(tempCountList);
 
@@ -238,7 +241,6 @@ namespace Thrinax.Parser.PDFParser
 
                             string _cleanText = pageTexts[pageTexts.Length - i - 1].Replace(" ", "").Replace("  ", "").Replace("\r", "").Replace("\n", "");
 
-
                             if (!string.IsNullOrWhiteSpace(_cleanText))
                             {
                                 int numberCount = NumberOfDigits(_cleanText);
@@ -291,15 +293,46 @@ namespace Thrinax.Parser.PDFParser
                 }
 
                 if (countList != null && countList.Count > 0)
-                    minLineCount = countList.Sum() / countList.Count;
+                    minLineCount = Math.Min(countList.Sum() / countList.Count, 30);
 
-                //2. 对段落进行合并和返回
+                //2. 对段落进行合并和返回   
+                int currentTablePos = 0;
+                bool isTableStarted = false;
                 bool lastIsEnd = true;
                 for (int page = 1; page <= pdf.Pages.Count; page++)
                 {
-                    PdfPageModel pdfPageModel = pdf.Pages[page - 1];
-                    string[] pageTexts = Regex.Split(pdfPageModel.Text, paragraphEndMark, RegexOptions.IgnoreCase);
+                    //处理上一页遗留的表格数据
+                    if (isTableStarted && page > 1)
+                    {
+                        PdfPageModel lastPdfPageModel = pdf.Pages[page - 2];
+                        if (lastPdfPageModel.Tables != null && lastPdfPageModel.Tables.Count > currentTablePos)
+                        {
+                            string lastTableStr = TableWriter.ToString(lastPdfPageModel.Tables[currentTablePos], tableContainType);
+                            //sbFileContent.AppendLine(tableStartMark);
+                            sbFileContent.AppendLine(lastTableStr.Replace("\r", "").Replace("\n", "\r\n"));
+                            //sbFileContent.AppendLine(tableEndMark);
+                        }
+                    }
 
+                    PdfPageModel pdfPageModel = pdf.Pages[page - 1];
+                    string[] pageTexts = lineRegex.Split(pdfPageModel.Text);
+
+                    //对表格进行结构化
+                    List<string> tableStrs = new List<string>();
+                    if (pdfPageModel.Tables != null && pdfPageModel.Tables.Count > 0)
+                    {
+                        foreach (Table table in pdfPageModel.Tables)
+                        {
+                            try
+                            {
+                                tableStrs.Add(TableWriter.ToString(table, tableContainType));
+                            }
+                            catch { }
+                        }
+                    }
+
+                    currentTablePos = 0;
+                    isTableStarted = false;
 
                     //bool needCleanMenu = false;
                     //清理需要清理的行，并进行合并
@@ -307,12 +340,64 @@ namespace Thrinax.Parser.PDFParser
                     {
                         //忽略页码行数据
                         if (needRemovePage.Any(f => f.PageNumber == page && f.LineNumber == i))
+                        {
+                            lastIsEnd = true;
                             continue;
-                        
+                        }
+
+                        string cleanText = pageTexts[i];
+                        bool isMatchTable = false;
+
                         //判断当前页的表格是否包含，存在的情况将表格列替换为表格位置标识的形式，后续替换为CSV或JSON
+                        tableGuess:
+                        if (tableStrs != null && tableStrs.Count > currentTablePos)
+                        {
+                            if (!string.IsNullOrWhiteSpace(cleanText))
+                            {
+                                string tableStr = tableStrs[currentTablePos];
+                                string[] words = Regex.Split(cleanText, @"[^\u4e00-\u9fa5a-zA-z0-9]+");
+                                if (words != null && words.Length > 0)
+                                {
+                                    foreach (var word in words)
+                                    {
+                                        if (string.IsNullOrWhiteSpace(word))
+                                            continue;
 
+                                        
+                                        if (tableStr.Contains(word))
+                                        {
+                                            isMatchTable = true;
+                                            continue;
+                                        }
+                                        else
+                                        {
+                                            isMatchTable = false;
+                                            break;
+                                        }
+                                    }
+                                }
 
-                        string cleanText = pageTexts[i].TrimEnd('\r','\n');
+                                if (isMatchTable)
+                                {
+                                    isTableStarted = true;
+                                    continue;
+                                }
+
+                                if (isTableStarted && !isMatchTable)
+                                {
+                                    //sbFileContent.AppendLine(tableStartMark);
+                                    sbFileContent.AppendLine(tableStr.Replace("\r", "").Replace("\n", "\r\n"));
+                                    //sbFileContent.AppendLine(tableEndMark);
+
+                                    lastIsEnd = true;
+                                    isTableStarted = false;
+                                    currentTablePos++;
+                                    goto tableGuess;
+                                }
+                            }
+                            
+                        }
+
 
                         //忽略目录部分的数据
                         string onlyText = cleanText.Replace(" ", "").Replace("  ", "").Replace("\r", "").Replace("\n", "");
@@ -337,49 +422,40 @@ namespace Thrinax.Parser.PDFParser
                         bool includeNormalFlag = Regex.IsMatch(cleanText, @"[！；，。“]");
 
                         //统计非空格字数
-                        int _lineCount = cleanText.Replace(" ", "").Replace("  ", "").Replace("\r", "").Replace("\n", "").Length;
+                        int _lineCount = onlyText.Length;
                         //判断该行字数是否大于最小行字数
                         bool isLenThanMinLineCount = _lineCount >= minLineCount;
 
-                        //特例一：存在明显的排序性质的行，如 ◆，（一），■ 等
                         bool firstException = false;
-                        //
+                        //特例一：存在明显的排序性质的行，如 ◆，（一），■ 等
+                        if (cleanText.StartsWith("◆") || cleanText.StartsWith("■") || cleanText.StartsWith("（"))
+                            firstException = true;
+                        //特例二：该行存在：的情况，较大可能是一段的开始
+                        if(!endWithStopFlag && !includeNormalFlag && !isLenThanMinLineCount && (cleanText.Contains(":") || cleanText.Contains("：")))
+                            firstException = true;
 
                         //情景一：该行是一段的结尾，加上段落的文字后换行
                         if (!firstException && endWithStopFlag)
                         {
                             sbFileContent.Append(cleanText);
-                            //sbFileContent.AppendLine("");
                             lastIsEnd = true;
                         }
-
                         //情景二：该行是普通的一行，并未结束
                         else if (!firstException && !endWithStopFlag && isLenThanMinLineCount)
                         {
                             sbFileContent.Append(cleanText);
                             lastIsEnd = false;
                         }
-
                         //情景三：该行是独立行
-                        else if (firstException || (!isLenThanMinLineCount && !endWithStopFlag && !includeNormalFlag))
+                        else if (lastIsEnd && (firstException || (!isLenThanMinLineCount && !endWithStopFlag && !includeNormalFlag)))
                         {
-                            if (lastIsEnd)
-                            {
-                                sbFileContent.Append(cleanText);
-                                //sbFileContent.AppendLine("");
-                                lastIsEnd = true;
-                            }
-                            else
-                            {
-                                sbFileContent.AppendLine(cleanText);
-                                //sbFileContent.AppendLine("");
-                                lastIsEnd = true;
-                            }
+                            sbFileContent.AppendLine(cleanText);
+                            lastIsEnd = true;
                         }
+                        //情景四：该行为独立的段落
                         else
                         {
                             sbFileContent.AppendLine(cleanText);
-                            //sbFileContent.AppendLine("");
                             lastIsEnd = true;
                         }
                     }

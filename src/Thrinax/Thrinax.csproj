@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-	<TargetFrameworks Condition="'$(LibraryFrameworks)'==''">net45;net452;netstandard2.0</TargetFrameworks>
+	<TargetFrameworks Condition="'$(LibraryFrameworks)'==''">netstandard2.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(LibraryFrameworks)'!=''">$(LibraryFrameworks)</TargetFrameworks>
     <Description>A lib which is used of Chinese unstructured text capture.</Description>
     <AssemblyTitle>Thrinax</AssemblyTitle>

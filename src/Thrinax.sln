@@ -16,6 +16,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThrinaxUnitTest", "..\test\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thrinax.Parser.PDFParser", "Thrinax.Parser.PDFParser\Thrinax.Parser.PDFParser.csproj", "{579A06A4-8B76-4407-B47A-2E29EFFC43F9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thrinax.PDFParserSample", "Thrinax.PDFParserSample\Thrinax.PDFParserSample.csproj", "{60B9F16A-3D68-437E-B066-8970F2051A50}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +44,10 @@ Global
 		{579A06A4-8B76-4407-B47A-2E29EFFC43F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{579A06A4-8B76-4407-B47A-2E29EFFC43F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{579A06A4-8B76-4407-B47A-2E29EFFC43F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60B9F16A-3D68-437E-B066-8970F2051A50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60B9F16A-3D68-437E-B066-8970F2051A50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60B9F16A-3D68-437E-B066-8970F2051A50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60B9F16A-3D68-437E-B066-8970F2051A50}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,6 +56,7 @@ Global
 		{DE0C0407-8388-4DDB-ABA1-4CAB5A45B493} = {E6687F05-A86A-4052-A8E9-E6C9561D4534}
 		{A6DCCF0A-B1FF-4058-A7A3-A0E0E93EC735} = {E6687F05-A86A-4052-A8E9-E6C9561D4534}
 		{89C75A9E-4897-45EC-B17A-2F6672F5695B} = {C102FC69-5FED-47A2-A5E4-03B59E54392A}
+		{60B9F16A-3D68-437E-B066-8970F2051A50} = {E6687F05-A86A-4052-A8E9-E6C9561D4534}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {60FBA11D-5629-4F20-97D8-DE0065A9961F}

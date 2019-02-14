@@ -18,6 +18,10 @@ namespace Thrinax.Parser.PDFParser
         /// <summary>
         /// 使用Json格式
         /// </summary>
-        Json = 2
+        Json = 2,
+        /// <summary>
+        /// 使用TSV格式
+        /// </summary>
+        TSV = 3
     }
 }
