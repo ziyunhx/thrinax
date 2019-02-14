@@ -131,8 +131,9 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="tabula">
-      <HintPath>..\..\..\..\DoSomeThing\smallproject\30.PdfToJson\libs\tabula.dll</HintPath>
+    <Reference Include="tabula, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\tabula.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />

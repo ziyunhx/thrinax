@@ -8,7 +8,7 @@
     <VersionPrefix>1.0.2</VersionPrefix>
     <Authors>Carey Tzou</Authors>
     <Company>Taikor</Company>
-    <Copyright>Copyright © GiMind 2005-2018</Copyright>
+    <Copyright>Copyright © GiMind 2005-2019</Copyright>
     <AssemblyName>Thrinax</AssemblyName>
     <PackageId>Thrinax</PackageId>
     <PackageTags>Thrinax;Crawler;Crawl,textcapture</PackageTags>
@@ -17,7 +17,7 @@
     <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <SignAssembly>true</SignAssembly>
     <RepositoryUrl>https://github.com/ziyunhx/thrinax</RepositoryUrl>
     <FileVersion>1.1.0.0906</FileVersion>

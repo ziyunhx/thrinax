@@ -123,8 +123,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="tabula">
-      <HintPath>..\..\..\..\DoSomeThing\smallproject\30.PdfToJson\libs\tabula.dll</HintPath>
+    <Reference Include="tabula, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\tabula.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
