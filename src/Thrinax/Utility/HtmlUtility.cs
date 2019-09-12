@@ -1,6 +1,6 @@
 ﻿using AngleSharp;
 using AngleSharp.Dom;
-using AngleSharp.Parser.Html;
+using AngleSharp.Html.Parser;
 using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
@@ -386,16 +386,14 @@ namespace Thrinax.Utility
             {
                 if (TryFixHTML)
                 {
-                    //We require a custom configuration
-                    var config = Configuration.Default;
                     //Let's create a new parser using this configuration
-                    var parser = new HtmlParser(config);
+                    var parser = new HtmlParser();
 
                     IDocument document = null;
                     try
                     {
                         //加载DOM, 修正Html
-                        document = parser.Parse(HTML);
+                        document = parser.ParseDocument(HTML);
 
                         if (document != null && !string.IsNullOrEmpty(document.DocumentElement.OuterHtml))
                         {

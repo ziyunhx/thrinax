@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,13 +21,9 @@ namespace Thrinax.Http
             return result;
         }
 
-        private Task<HttpResponseMessage> HttpGetAsync(string api, object parameters)
+        public Task<HttpResponseMessage> HttpGetAsync(string api, object parameters)
         {
             var paramType = parameters.GetType();
-            if (!(paramType.Name.Contains("AnonymousType") && paramType.Namespace == null))
-            {
-                throw new ArgumentException("Only anonymous type parameters are supported.");
-            }
 
             var dict = paramType.GetProperties().ToDictionary(k => k.Name, v => string.Format("{0}", v.GetValue(parameters, null)));
 
@@ -43,7 +38,7 @@ namespace Thrinax.Http
             return result;
         }
 
-        private Task<HttpResponseMessage> HttpGetAsync(string api, Dictionary<string, object> parameters = null)
+        public Task<HttpResponseMessage> HttpGetAsync(string api, Dictionary<string, object> parameters = null)
         {
             if (parameters == null)
                 parameters = new Dictionary<string, object>();
@@ -72,13 +67,19 @@ namespace Thrinax.Http
             return result;
         }
 
-        private Task<HttpResponseMessage> HttpPostAsync(string api, object parameters)
+        public HttpResponseMessage HttpPost(string api, HttpContent httpContent)
+        {
+            return http.PostAsync(api, httpContent).Result;
+        }
+
+        public Task<HttpResponseMessage> HttpPostAsync(string api, HttpContent httpContent)
+        {
+            return http.PostAsync(api, httpContent);
+        }
+
+        public Task<HttpResponseMessage> HttpPostAsync(string api, object parameters)
         {
             var paramType = parameters.GetType();
-            if (!(paramType.Name.Contains("AnonymousType") && paramType.Namespace == null))
-            {
-                throw new ArgumentException("Only anonymous type parameters are supported.");
-            }
 
             var dict = paramType.GetProperties().ToDictionary(k => k.Name, v => v.GetValue(parameters, null));
 
@@ -92,7 +93,7 @@ namespace Thrinax.Http
             return result;
         }
 
-        private Task<HttpResponseMessage> HttpPostAsync(string api, Dictionary<string, object> parameters, bool needAuthorized = true)
+        public Task<HttpResponseMessage> HttpPostAsync(string api, Dictionary<string, object> parameters)
         {
             if (parameters == null)
                 parameters = new Dictionary<string, object>();

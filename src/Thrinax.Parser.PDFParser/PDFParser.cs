@@ -19,12 +19,12 @@ namespace Thrinax.Parser.PDFParser
     /// </summary>
     public class PDFParser
     {
-        private static string pageEndMark = "--GIMindPageEnd--";
-        private static string paragraphEndMark = "--GIMindParagraphEnd--";
-        private static string tableStartMark = "--GIMindTableStart--";
-        private static string tableEndMark = "--GIMindTableEnd--";
-        private static string structStartMark = "--GIMindStructStart--";
-        private static string structEndMark = "--GIMindStructEnd--";
+        private static string pageEndMark = "--ThrinaxPageEnd--";
+        private static string paragraphEndMark = "--ThrinaxParagraphEnd--";
+        private static string tableStartMark = "--ThrinaxTableStart--";
+        private static string tableEndMark = "--ThrinaxTableEnd--";
+        private static string structStartMark = "--ThrinaxStructStart--";
+        private static string structEndMark = "--ThrinaxStructEnd--";
         private static Regex lineRegex = new Regex("\r\n", RegexOptions.Compiled);
         /// <summary>
         /// 通过文件名解析PDF
