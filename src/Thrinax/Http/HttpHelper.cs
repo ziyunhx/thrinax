@@ -21,6 +21,7 @@ namespace Thrinax.Http
     public class HttpHelper
     {
         public const string CharsetReg = @"(meta.*?charset=""?(?<Charset>[^\s""'>;]+)""?)|(xml.*?encoding=""?(?<Charset>[^\s"">;]+)""?)";
+        private static bool isRegisterGBK = false;
 
         /// <summary>
         /// 使用Http Request获取网页信息
@@ -75,6 +76,12 @@ namespace Thrinax.Http
                     default:
                         ResponseStream = httpWebResponse.GetResponseStream();
                         break;
+                }
+
+                if (!isRegisterGBK)
+                {
+                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                    isRegisterGBK = true;
                 }
 
                 try
