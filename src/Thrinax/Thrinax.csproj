@@ -23,15 +23,37 @@
     <DelaySign>false</DelaySign>
     <AssemblyVersion>1.2.2.0</AssemblyVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="tessdata\pdf.ttf" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AngleSharp" Version="0.14.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.28" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
     <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="87.0.4280.2000" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
 	<PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
+	<PackageReference Include="Tabula" Version="0.1.1" />
+	<PackageReference Include="Tabula.Csv" Version="0.1.1" />
+	<PackageReference Include="Tabula.Json" Version="0.1.1" />
+	<PackageReference Include="Tesseract" Version="4.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="tessdata\pdf.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="tessdata\chi_sim.traineddata">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="tessdata\chi_tra.traineddata">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="tessdata\eng.traineddata">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

@@ -16,10 +16,6 @@ namespace Thrinax.Parser
     /// </summary>
     public class XpathParser
     {
-        private static ParallelOptions _parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 5 };
-        private static object syncObj = new object();
-        private static object patternsObj = new object();
-
         public static ArticleList ParseList(string Html, string Pattern, string Url = null, bool RecogNextPage = true)
         {
             //输入检查

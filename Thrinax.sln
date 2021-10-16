@@ -1,0 +1,58 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31515.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thrinax", "src\Thrinax\Thrinax.csproj", "{F3BD740C-6E6D-4656-8349-AF805C54DF6A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{E6687F05-A86A-4052-A8E9-E6C9561D4534}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thrinax.ExtractArticleSample", "samples\Thrinax.ExtractArticleSample\Thrinax.ExtractArticleSample.csproj", "{DE0C0407-8388-4DDB-ABA1-4CAB5A45B493}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thrinax.HtmlListParserSample", "samples\Thrinax.HtmlListParserSample\Thrinax.HtmlListParserSample.csproj", "{A6DCCF0A-B1FF-4058-A7A3-A0E0E93EC735}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{C102FC69-5FED-47A2-A5E4-03B59E54392A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thrinax.PDFParserDemo", "samples\Thrinax.PDFParserDemo\Thrinax.PDFParserDemo.csproj", "{E00675FE-C2F7-422E-BCB3-947135603023}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThrinaxTests", "src\ThrinaxTests\ThrinaxTests.csproj", "{9CCECFA0-BD4B-4875-A19B-273E39FC3F35}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F3BD740C-6E6D-4656-8349-AF805C54DF6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3BD740C-6E6D-4656-8349-AF805C54DF6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3BD740C-6E6D-4656-8349-AF805C54DF6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3BD740C-6E6D-4656-8349-AF805C54DF6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE0C0407-8388-4DDB-ABA1-4CAB5A45B493}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE0C0407-8388-4DDB-ABA1-4CAB5A45B493}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE0C0407-8388-4DDB-ABA1-4CAB5A45B493}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE0C0407-8388-4DDB-ABA1-4CAB5A45B493}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6DCCF0A-B1FF-4058-A7A3-A0E0E93EC735}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6DCCF0A-B1FF-4058-A7A3-A0E0E93EC735}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6DCCF0A-B1FF-4058-A7A3-A0E0E93EC735}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6DCCF0A-B1FF-4058-A7A3-A0E0E93EC735}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E00675FE-C2F7-422E-BCB3-947135603023}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E00675FE-C2F7-422E-BCB3-947135603023}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E00675FE-C2F7-422E-BCB3-947135603023}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E00675FE-C2F7-422E-BCB3-947135603023}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CCECFA0-BD4B-4875-A19B-273E39FC3F35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CCECFA0-BD4B-4875-A19B-273E39FC3F35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CCECFA0-BD4B-4875-A19B-273E39FC3F35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CCECFA0-BD4B-4875-A19B-273E39FC3F35}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DE0C0407-8388-4DDB-ABA1-4CAB5A45B493} = {E6687F05-A86A-4052-A8E9-E6C9561D4534}
+		{A6DCCF0A-B1FF-4058-A7A3-A0E0E93EC735} = {E6687F05-A86A-4052-A8E9-E6C9561D4534}
+		{E00675FE-C2F7-422E-BCB3-947135603023} = {E6687F05-A86A-4052-A8E9-E6C9561D4534}
+		{9CCECFA0-BD4B-4875-A19B-273E39FC3F35} = {C102FC69-5FED-47A2-A5E4-03B59E54392A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {60FBA11D-5629-4F20-97D8-DE0065A9961F}
+	EndGlobalSection
+EndGlobal

@@ -7,13 +7,13 @@ using Thrinax.Utility;
 
 namespace Thrinax.Parser
 {
-    class PageParser
+    public class PageParser
     {
-        static int countAll = 0;
-        static int successCount = 0;
-        static int errorCount = 0;
-        static int scriptCount = 0;
-        static int exCount = 0;
+        public static int countAll = 0;
+        public static int successCount = 0;
+        public static int errorCount = 0;
+        public static int scriptCount = 0;
+        public static int exCount = 0;
 
         public static bool validateNextPage(string Html, string Pattern, ref string Url)
         {

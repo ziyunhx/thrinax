@@ -14,7 +14,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Thrinax.Parser.PDFParser;
 
 namespace Thrinax.PDFParserSample
 {
@@ -33,34 +32,88 @@ namespace Thrinax.PDFParserSample
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             fbd.ShowDialog();
             if (fbd.SelectedPath != string.Empty)
+            {
                 this.txtPDFPath.Text = fbd.SelectedPath;
+                this.btnStartParser.Content = "开始解析";
+                this.btnStartParser.IsEnabled = true;
+            }
+
         }
 
-        private void btnStartParser_Click(object sender, RoutedEventArgs e)
+        private async void btnStartParser_Click(object sender, RoutedEventArgs e)
         {
             string pdfPath = this.txtPDFPath.Text;
-
-            if (!string.IsNullOrEmpty(pdfPath))
+            this.btnStartParser.Content = "解析中...";
+            this.btnStartParser.IsEnabled = false;
+            await Task.Run(() =>
             {
-                DirectoryInfo dirInfos = new DirectoryInfo(pdfPath);
-                List<FileInfo> itemfiles = new List<FileInfo>();
-
-                DateTime readFileTime = DateTime.Now;
-
-                GetFiles(dirInfos, ref itemfiles);
-
-                if (itemfiles != null && itemfiles.Count > 0)
+                if (!string.IsNullOrEmpty(pdfPath))
                 {
-                    foreach (var dirInfo in itemfiles)
+                    DirectoryInfo dirInfos = new DirectoryInfo(pdfPath);
+                    List<FileInfo> itemfiles = new List<FileInfo>();
+
+                    DateTime readFileTime = DateTime.Now;
+
+                    GetFiles(dirInfos, ref itemfiles);
+
+                    if (itemfiles != null && itemfiles.Count > 0)
                     {
-                        var result = PDFParser.Parser(dirInfo.FullName, TableContainType.CSV);
-                        if (result != null && !string.IsNullOrWhiteSpace(result.Text))
+                        var resultPath = System.IO.Path.Combine(pdfPath, "parser_result");
+                        if (!Directory.Exists(resultPath))
                         {
-                            File.WriteAllText(System.IO.Path.Combine(Environment.CurrentDirectory, "result/" + dirInfo.Name.Replace(".pdf", "")) + ".txt", result.Text);
+                            Directory.CreateDirectory(resultPath);
+                        }
+
+                        foreach (var dirInfo in itemfiles)
+                        {
+                            if (dirInfo.FullName.ToLower().EndsWith(".pdf"))
+                            {
+                                var result = PDFParser.Parser(dirInfo.FullName, TableContainType.CSV);
+                                if (result != null && !string.IsNullOrWhiteSpace(result.Text))
+                                {
+                                    File.WriteAllText(System.IO.Path.Combine(resultPath, dirInfo.Name.Replace(".pdf", "")) + ".txt", result.Text);
+                                }
+                            }
+                            else if(dirInfo.FullName.ToLower().EndsWith(".jpg"))
+                            {
+                                using (var engine = new TesseractEngine("tessdata", "chi_sim", EngineMode.Default))
+                                {
+                                    using (var img = Pix.LoadFromFile(dirInfo.FullName))
+                                    {
+                                        using (var page = engine.Process(img))
+                                        {
+                                            string text = page.GetText();
+
+                                            if (!string.IsNullOrWhiteSpace(text))
+                                            {
+                                                File.WriteAllText(System.IO.Path.Combine(resultPath, dirInfo.Name.Replace(".pdf", "")) + ".1.txt", text);
+                                            }
+                                        }
+                                    }
+                                }
+
+
+                                //AspriseOCR.SetUp();
+                                //AspriseOCR ocr = new AspriseOCR();
+                                //ocr.StartEngine("chi", AspriseOCR.SPEED_FASTEST);
+                                ////string file = "C:\\YOUR_FILE.jpg"; // ☜ jpg, gif, tif, pdf, etc.
+                                //string s = ocr.Recognize(dirInfo.FullName, -1, -1, -1, -1, -1, AspriseOCR.RECOGNIZE_TYPE_ALL, AspriseOCR.OUTPUT_FORMAT_PLAINTEXT);
+
+                                //if (!string.IsNullOrWhiteSpace(s))
+                                //{
+                                //    File.WriteAllText(System.IO.Path.Combine(resultPath, dirInfo.Name.Replace(".pdf", "")) + ".2.txt", s);
+                                //}
+
+                                ////Console.WriteLine("Result: " + s);
+                                //ocr.StopEngine();
+                            }
                         }
                     }
                 }
-            }
+            });
+
+            this.btnStartParser.Content = "解析完成";
+            this.btnStartParser.IsEnabled = false;
         }
 
         public static void GetFiles(DirectoryInfo floder, ref List<FileInfo> files)

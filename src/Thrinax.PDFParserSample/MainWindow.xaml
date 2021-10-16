@@ -10,7 +10,7 @@
         <Label Content="PDF文件目录：" HorizontalAlignment="Left" Margin="21,114,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.3,0.577"/>
         <TextBox x:Name="txtPDFPath" HorizontalAlignment="Left" Height="23" Margin="119,115,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="260"/>
         <Button x:Name="btnChosePDF" Content="选择" HorizontalAlignment="Left" Margin="393,115,0,0" VerticalAlignment="Top" Width="70" Height="23" Click="btnChosePDF_Click"/>
-        <Button x:Name="btnStartParser" Content="开始解析" HorizontalAlignment="Left" Margin="207,185,0,0" VerticalAlignment="Top" Width="116" Height="44" Click="btnStartParser_Click"/>
+        <Button x:Name="btnStartParser" Content="开始解析" HorizontalAlignment="Left" Margin="207,185,0,0" VerticalAlignment="Top" Width="116" Height="44" Click="btnStartParser_Click" IsEnabled="False"/>
 
     </Grid>
 </Window>
